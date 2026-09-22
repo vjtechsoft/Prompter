@@ -4,6 +4,8 @@ import path from 'path';
 import fs from 'fs/promises';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 const ALLOWED_MIME_TYPES = [
   'image/jpeg',
   'image/png',

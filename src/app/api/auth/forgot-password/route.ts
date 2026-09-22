@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import crypto from 'crypto';
 import { logActivity } from '@/lib/audit';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const { email } = await req.json();

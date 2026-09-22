@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { getCurrentUser, TOKEN_COOKIE_NAME } from '@/lib/auth';
 import { logActivity } from '@/lib/audit';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser(req);

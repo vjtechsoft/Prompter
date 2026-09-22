@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/auth';
 import { logActivity } from '@/lib/audit';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser(req);

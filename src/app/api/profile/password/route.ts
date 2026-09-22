@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { comparePassword, getCurrentUser, hashPassword } from '@/lib/auth';
 import { logActivity } from '@/lib/audit';
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(req: NextRequest) {
   try {
     const user = await getCurrentUser(req);

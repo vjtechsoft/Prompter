@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { AdminLayout } from '@/components/layout/admin-layout';
 import {
   Users,
@@ -47,7 +47,7 @@ export default function AdminsPage() {
 
   const { success, error } = useToast();
 
-  const loadAdmins = async () => {
+  const loadAdmins = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/admins');
@@ -60,11 +60,11 @@ export default function AdminsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
 
   useEffect(() => {
     loadAdmins();
-  }, []);
+  }, [loadAdmins]);
 
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();

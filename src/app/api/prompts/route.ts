@@ -4,6 +4,8 @@ import { getCurrentUser } from '@/lib/auth';
 import { calculatePopularScore, calculateTrendingScore, seededHash, slugify } from '@/lib/utils';
 import { logActivity } from '@/lib/audit';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser(req);

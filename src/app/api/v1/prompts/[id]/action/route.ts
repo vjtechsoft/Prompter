@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { calculatePopularScore, calculateTrendingScore } from '@/lib/utils';
 import { validateClientApiKey } from '@/lib/client-auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await validateClientApiKey(req);
