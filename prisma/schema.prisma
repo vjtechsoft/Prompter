@@ -1,0 +1,244 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id               String        @id @default(cuid())
+  name             String
+  email            String        @unique
+  password         String
+  role             String        @default("ADMIN") // "SUPER_ADMIN" or "ADMIN"
+  avatar           String?
+  status           String        @default("ACTIVE") // "ACTIVE" or "INACTIVE"
+  rememberToken    String?
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  prompts          Prompt[]
+  categories       Category[]
+  activityLogs     ActivityLog[]
+  loginLogs        LoginLog[]
+  notifications    Notification[]
+  subcategories    Subcategory[]
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  title         String        @unique
+  slug          String        @unique
+  image         String
+  status        Boolean       @default(true)
+  isFeatured    Boolean       @default(false)
+  position      Int           @default(0)
+  createdById   String
+  createdBy     User          @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  prompts       Prompt[]
+  subcategories Subcategory[]
+
+  @@index([isFeatured])
+}
+
+model Subcategory {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  image       String?
+  status      Boolean  @default(true)
+  position    Int      @default(0)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  prompts     Prompt[]
+
+  @@unique([categoryId, title])
+  @@index([categoryId])
+  @@index([createdById])
+}
+
+model Prompt {
+  id            String       @id @default(cuid())
+  title         String       @unique
+  slug          String       @unique
+  prompt        String
+  featuredImage String
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subcategoryId String?
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  tags          String       @default("[]") // JSON string of tags
+  likes         Int          @default(0)
+  views         Int          @default(0)
+  shares        Int          @default(0)
+  isPremium     Boolean      @default(false)
+  isFeatured    Boolean      @default(false)
+  status        Boolean      @default(true)
+  isDeleted     Boolean      @default(false) // Soft delete
+  createdById   String
+  createdBy     User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  promptLikes   PromptLike[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([subcategoryId])
+  @@index([isFeatured])
+}
+
+model Advertisement {
+  id                       String   @id @default("default")
+  activeProvider           String   @default("ADMOB") // ADMOB, META, UNITY, NONE
+  interstitialInterval     Int      @default(3) // Interval counter for interstitial ads (e.g. trigger after every X actions/clicks)
+  nativeInterval           Int      @default(5) // Interval counter for native ads (e.g. place ad card after every Y items in list)
+  admobEnabled             Boolean  @default(true)
+  admobAppId               String   @default("")
+  admobBannerId            String   @default("")
+  admobInterstitialId      String   @default("")
+  admobRewardedId          String   @default("")
+  admobNativeId            String   @default("")
+  admobAppOpenId           String   @default("")
+  metaEnabled              Boolean  @default(false)
+  metaBannerId             String   @default("")
+  metaInterstitialId       String   @default("")
+  metaRewardedId           String   @default("")
+  metaNativeId             String   @default("")
+  unityEnabled             Boolean  @default(false)
+  unityGameId              String   @default("")
+  unityBannerPlacement     String   @default("")
+  unityInterstitialPlacement String @default("")
+  unityRewardedPlacement   String   @default("")
+  updatedAt                DateTime @updatedAt
+}
+
+model NotificationSetting {
+  id               String   @id @default("default")
+  oneSignalAppId   String   @default("")
+  oneSignalRestKey String   @default("")
+  isEnabled        Boolean  @default(false)
+  updatedAt        DateTime @updatedAt
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  title       String
+  message     String
+  image       String?
+  deepLink    String?
+  sendToAll   Boolean   @default(true)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  status      String    @default("SENT") // SENT, SCHEDULED, DRAFT, FAILED
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model AppSettings {
+  id              String   @id @default("default")
+  appName         String   @default("Prompter Admin")
+  developerName   String   @default("Prompter Devs")
+  packageName     String   @default("com.prompter.admin")
+  versionName     String   @default("1.0.0")
+  versionCode     String   @default("100")
+  supportEmail    String   @default("support@prompter.io")
+  website         String   @default("https://prompter.io")
+  contactNumber   String   @default("+1 (555) 019-2834")
+  copyright       String   @default("© 2026 Prompter. All rights reserved.")
+  defaultLanguage String   @default("en")
+  theme           String   @default("system")
+  timezone        String   @default("UTC")
+  currency        String   @default("USD ($)")
+  maintenanceMode Boolean  @default(false)
+  clientApiKey    String   @default("prompter_live_sec_7f8a9b1c2d3e4f5a")
+  requireApiKey   Boolean  @default(true)
+  appLogo         String   @default("/logo.png")
+  splashLogo      String   @default("/logo.png")
+  appIcon         String   @default("/icon.png")
+  favicon         String   @default("/favicon.ico")
+  updatedAt       DateTime @updatedAt
+}
+
+model AppUrls {
+  id                 String   @id @default("default")
+  privacyPolicy      String   @default("https://prompter.io/privacy")
+  termsOfService     String   @default("https://prompter.io/terms")
+  refundPolicy       String   @default("https://prompter.io/refund")
+  dataDeletionPolicy String   @default("https://prompter.io/data-deletion")
+  contactUs          String   @default("https://prompter.io/contact")
+  aboutUs            String   @default("https://prompter.io/about")
+  website            String   @default("https://prompter.io")
+  playStore          String   @default("https://play.google.com/store/apps/details?id=com.prompter.app")
+  facebook           String   @default("https://facebook.com/prompter")
+  instagram          String   @default("https://instagram.com/prompter")
+  youtube            String   @default("https://youtube.com/@prompter")
+  twitter            String   @default("https://x.com/prompter")
+  telegram           String   @default("https://t.me/prompter")
+  updatedAt          DateTime @updatedAt
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model LoginLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+  status    String   @default("SUCCESS") // SUCCESS, FAILED
+  createdAt DateTime @default(now())
+}
+
+model AppUser {
+  id           String   @id @default(cuid())
+  name         String   @default("User")
+  email        String   @unique
+  avatar       String?
+  authProvider String   @default("GOOGLE")
+  status       String   @default("ACTIVE") // ACTIVE, BLOCKED
+  isVip        Boolean  @default(false)
+  appVersion   String?
+  likesCount   Int      @default(0)
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model PromptLike {
+  id               String   @id @default(cuid())
+  promptId         String
+  prompt           Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  clientIdentifier String   // "user:${userId}" or "device:${deviceId}" or "ip:${ip}"
+  userId           String?  // Optional AppUser ID if signed in
+  createdAt        DateTime @default(now())
+
+  @@unique([promptId, clientIdentifier])
+  @@index([promptId])
+  @@index([clientIdentifier])
+  @@index([userId])
+}
+
