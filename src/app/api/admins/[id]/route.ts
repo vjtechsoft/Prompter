@@ -3,6 +3,53 @@ import prisma from '@/lib/prisma';
 import { getCurrentUser, hashPassword } from '@/lib/auth';
 import { logActivity } from '@/lib/audit';
 
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const user = await getCurrentUser(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Only Super Admin can view admin details' }, { status: 403 });
+    }
+
+    const { id } = params;
+    const admin = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatar: true,
+        status: true,
+        lastLoginAt: true,
+        lastLoginIp: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            prompts: { where: { isDeleted: false } },
+            categories: true,
+          },
+        },
+      },
+    });
+
+    if (!admin) {
+      return NextResponse.json({ error: 'Admin not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, admin });
+  } catch (error) {
+    console.error('Error fetching admin:', error);
+    return NextResponse.json({ error: 'Failed to fetch admin account' }, { status: 500 });
+  }
+}
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await getCurrentUser(req);
