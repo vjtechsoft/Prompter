@@ -6,7 +6,17 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // 1. Clear existing data in reverse relation order
+  // Check if database is already initialized to prevent wiping production data
+  const existingSuperAdmin = await prisma.user.findFirst({
+    where: { role: 'SUPER_ADMIN' },
+  });
+
+  if (existingSuperAdmin) {
+    console.log('⚡ Database already initialized with Super Admin. Skipping seed to protect production data.');
+    return;
+  }
+
+  // 1. Clear existing data in reverse relation order for initial clean seed
   await prisma.activityLog.deleteMany({});
   await prisma.loginLog.deleteMany({});
   await prisma.notification.deleteMany({});
