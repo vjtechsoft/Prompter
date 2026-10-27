@@ -43,6 +43,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         likes: true,
         views: true,
         shares: true,
+        copies: true,
         isPremium: true,
         isFeatured: true,
         createdAt: true,

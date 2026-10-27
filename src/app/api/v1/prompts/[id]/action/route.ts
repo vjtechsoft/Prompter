@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { calculatePopularScore, calculateTrendingScore } from '@/lib/utils';
 import { validateClientApiKey } from '@/lib/client-auth';
+import { invalidateTrendingCache } from '@/lib/trending';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,9 +17,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const body = await req.json().catch(() => ({}));
     const { type, userId, deviceId, toggle } = body;
 
-    if (!type || !['like', 'unlike', 'view', 'share'].includes(type)) {
+    if (!type || !['like', 'unlike', 'view', 'share', 'copy'].includes(type)) {
       return NextResponse.json(
-        { success: false, error: "Invalid action type. Must be 'like', 'unlike', 'view', or 'share'." },
+        { success: false, error: "Invalid action type. Must be 'like', 'unlike', 'view', 'share', or 'copy'." },
         { status: 400 }
       );
     }
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         likes: true,
         views: true,
         shares: true,
+        copies: true,
       },
     });
 
@@ -97,8 +99,19 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           const updated = await prisma.prompt.update({
             where: { id: prompt.id },
             data: { likes: newLikes },
-            select: { id: true, slug: true, likes: true, views: true, shares: true },
+            select: { id: true, slug: true, likes: true, views: true, shares: true, copies: true },
           });
+
+          // Delete recent like activity
+          await prisma.promptActivity.deleteMany({
+            where: {
+              promptId: prompt.id,
+              type: 'like',
+              clientIdentifier,
+            },
+          }).catch(() => {});
+
+          invalidateTrendingCache();
 
           // If linked to an AppUser, decrement user's likesCount
           if (effectiveUserId) {
@@ -170,11 +183,22 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         },
       });
 
+      // Track time-based activity
+      await prisma.promptActivity.create({
+        data: {
+          promptId: prompt.id,
+          type: 'like',
+          clientIdentifier,
+        },
+      });
+
       const updated = await prisma.prompt.update({
         where: { id: prompt.id },
         data: { likes: { increment: 1 } },
-        select: { id: true, slug: true, likes: true, views: true, shares: true },
+        select: { id: true, slug: true, likes: true, views: true, shares: true, copies: true },
       });
+
+      invalidateTrendingCache();
 
       // If linked to an AppUser, increment user's likesCount
       if (effectiveUserId) {
@@ -203,22 +227,56 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       });
     }
 
-    // 3. SHARE or VIEW action (simple atomic counter increment)
-    const updateData: any = {};
-    if (type === 'view') updateData.views = { increment: 1 };
-    if (type === 'share') updateData.shares = { increment: 1 };
+    // 3. VIEW, SHARE, or COPY action
+    let wasIncremented = true;
 
-    const updated = await prisma.prompt.update({
-      where: { id: prompt.id },
-      data: updateData,
-      select: {
-        id: true,
-        slug: true,
-        likes: true,
-        views: true,
-        shares: true,
-      },
-    });
+    // View rate-limiting / deduplication (skip duplicate view if same client viewed in last 15 mins)
+    if (type === 'view') {
+      const recentView = await prisma.promptActivity.findFirst({
+        where: {
+          promptId: prompt.id,
+          type: 'view',
+          clientIdentifier,
+          createdAt: { gte: new Date(Date.now() - 15 * 60 * 1000) },
+        },
+      });
+
+      if (recentView) {
+        wasIncremented = false;
+      }
+    }
+
+    let updated = prompt;
+    if (wasIncremented) {
+      const updateData: any = {};
+      if (type === 'view') updateData.views = { increment: 1 };
+      if (type === 'share') updateData.shares = { increment: 1 };
+      if (type === 'copy') updateData.copies = { increment: 1 };
+
+      updated = await prisma.prompt.update({
+        where: { id: prompt.id },
+        data: updateData,
+        select: {
+          id: true,
+          slug: true,
+          likes: true,
+          views: true,
+          shares: true,
+          copies: true,
+        },
+      });
+
+      // Record activity event
+      await prisma.promptActivity.create({
+        data: {
+          promptId: prompt.id,
+          type,
+          clientIdentifier,
+        },
+      });
+
+      invalidateTrendingCache();
+    }
 
     // Check if user has liked this prompt to preserve accurate isLiked state
     const existingLike = await prisma.promptLike.findUnique({
@@ -233,7 +291,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({
       success: true,
       action: type,
-      message: `Successfully registered ${type}`,
+      deduplicated: !wasIncremented,
+      message: wasIncremented ? `Successfully registered ${type}` : `Recent ${type} already recorded`,
       data: {
         ...updated,
         isLiked: Boolean(existingLike),

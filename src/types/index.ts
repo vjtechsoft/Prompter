@@ -78,6 +78,7 @@ export type PromptItem = {
   likes: number;
   views: number;
   shares: number;
+  copies: number;
   isPremium: boolean;
   isFeatured: boolean;
   status: boolean;
@@ -89,6 +90,14 @@ export type PromptItem = {
   };
   trendingScore?: number;
   popularScore?: number;
+  score?: number;
+  rank?: number;
+  periodActivity?: {
+    views: number;
+    likes: number;
+    copies: number;
+    shares: number;
+  };
   isLiked?: boolean;
   createdAt: string;
   updatedAt: string;
@@ -206,6 +215,7 @@ export type DashboardStats = {
   totalLikes: number;
   totalViews: number;
   totalShares: number;
+  totalCopies?: number;
   totalAdmins: number;
   recentPrompts: PromptItem[];
   recentCategories: CategoryItem[];
@@ -215,3 +225,57 @@ export type DashboardStats = {
   categoryDistribution: { name: string; value: number }[];
   viewsAnalytics: { date: string; views: number; likes: number; shares: number }[];
 };
+
+export type TrendingPeriod = 'today' | 'weekly' | 'monthly' | 'all_time';
+
+export type TrendingConfig = {
+  id: string;
+  weightViews: number;
+  weightLikes: number;
+  weightCopies: number;
+  weightShares: number;
+  maxPromptsPerCategory: number;
+  enableToday: boolean;
+  enableWeekly: boolean;
+  enableMonthly: boolean;
+  enableAllTime: boolean;
+  minScoreThreshold: number;
+  updatedAt?: string;
+};
+
+export type TrendingRankedPrompt = PromptItem & {
+  rank: number;
+  score: number;
+  periodActivity?: {
+    views: number;
+    likes: number;
+    copies: number;
+    shares: number;
+  };
+};
+
+export type TrendingCategoryData = {
+  category: TrendingPeriod;
+  title: string;
+  description: string;
+  periodRange?: { start: string; end: string };
+  totalCount: number;
+  prompts: TrendingRankedPrompt[];
+};
+
+export type TrendingApiResponse = {
+  success: boolean;
+  data: {
+    today: TrendingRankedPrompt[];
+    weekly: TrendingRankedPrompt[];
+    monthly: TrendingRankedPrompt[];
+    all_time: TrendingRankedPrompt[];
+  };
+  meta: {
+    timezone: string;
+    weights: { views: number; likes: number; copies: number; shares: number };
+    limits: { today: number; weekly: number; monthly: number; all_time: number };
+    generatedAt: string;
+  };
+};
+

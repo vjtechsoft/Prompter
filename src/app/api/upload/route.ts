@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
+import prisma from '@/lib/prisma';
 import path from 'path';
 import fs from 'fs/promises';
 import crypto from 'crypto';
@@ -65,13 +66,31 @@ export async function POST(req: NextRequest) {
     if (ext === '.jpeg') ext = '.jpg';
 
     const filename = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
-    // Ensure directory exists
-    await fs.mkdir(uploadDir, { recursive: true });
+    // Store in PostgreSQL database (guarantees serverless compatibility on Vercel)
+    try {
+      const base64Data = buffer.toString('base64');
+      await prisma.uploadedFile.create({
+        data: {
+          filename,
+          mimeType: mimeType || 'image/jpeg',
+          data: base64Data,
+          size: file.size,
+        },
+      });
+    } catch (dbErr) {
+      console.warn('Could not save uploaded file to database:', dbErr);
+    }
 
-    const filePath = path.join(uploadDir, filename);
-    await fs.writeFile(filePath, buffer);
+    // Try saving to local disk if filesystem is writable (e.g. local development)
+    try {
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+      await fs.mkdir(uploadDir, { recursive: true });
+      const filePath = path.join(uploadDir, filename);
+      await fs.writeFile(filePath, buffer);
+    } catch {
+      // Ignored: read-only filesystem on Vercel / serverless containers
+    }
 
     const publicUrl = `/uploads/${filename}`;
 

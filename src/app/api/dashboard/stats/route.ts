@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { calculatePopularScore, calculateTrendingScore } from '@/lib/utils';
+import { getDynamicTrending } from '@/lib/trending';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,19 +27,21 @@ export async function GET(req: NextRequest) {
     // Admins count
     const totalAdmins = await prisma.user.count({ where: { role: 'ADMIN' } });
 
-    // Aggregations: likes, views, shares
+    // Aggregations: likes, views, shares, copies
     const aggregateMetrics = await prisma.prompt.aggregate({
       where: { isDeleted: false },
       _sum: {
         likes: true,
         views: true,
         shares: true,
+        copies: true,
       },
     });
 
     const totalLikes = aggregateMetrics._sum.likes || 0;
     const totalViews = aggregateMetrics._sum.views || 0;
     const totalShares = aggregateMetrics._sum.shares || 0;
+    const totalCopies = aggregateMetrics._sum.copies || 0;
 
     // Recent Prompts
     const recentPrompts = await prisma.prompt.findMany({
@@ -84,10 +87,19 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Trending Prompts (highest trending score)
-    const trendingPrompts = [...scoredPrompts]
-      .sort((a, b) => (b.trendingScore || 0) - (a.trendingScore || 0))
-      .slice(0, 5);
+    // Dynamic Trending Prompts (Today trending if available, fallback All-Time)
+    let trendingPrompts: any[] = [];
+    try {
+      const dynamicTrending = await getDynamicTrending({ limit: 5 });
+      trendingPrompts = (dynamicTrending.data?.today?.length || 0) > 0
+        ? dynamicTrending.data.today
+        : (dynamicTrending.data?.all_time || []);
+    } catch (err) {
+      // Fallback to in-memory score if trending engine throws
+      trendingPrompts = [...scoredPrompts]
+        .sort((a, b) => (b.trendingScore || 0) - (a.trendingScore || 0))
+        .slice(0, 5);
+    }
 
     // Popular Categories with prompt percentage
     const categoriesWithCount = await prisma.category.findMany({
@@ -149,6 +161,7 @@ export async function GET(req: NextRequest) {
       totalLikes,
       totalViews,
       totalShares,
+      totalCopies,
       totalAdmins,
       recentPrompts: recentPrompts.map((p) => {
         let parsedTags: string[] = [];

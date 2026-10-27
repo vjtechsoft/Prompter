@@ -158,6 +158,22 @@ export default function ClientApisPage() {
       ],
     },
     {
+      id: 'get-trending',
+      method: 'GET',
+      path: '/api/v1/trending',
+      category: 'Prompts',
+      summary: 'Dynamic Trending Prompts (Today, Weekly, Monthly, All-Time)',
+      description:
+        'Calculates real-time trending prompts across four independent timeframes: Today, Weekly, Monthly, and All-Time. Calculates ranking using the admin-configured formula: Trending Score = (Views × Wv) + (Likes × Wl) + (Copies × Wc) + (Shares × Ws). Supports single period queries or fetching all 4 categories in one payload.',
+      defaultTestPath: '/api/v1/trending',
+      params: [
+        { name: 'period', type: 'string', required: false, defaultVal: 'all', description: "'today' | 'weekly' | 'monthly' | 'all_time' or omit for all 4 categories" },
+        { name: 'limit', type: 'integer', required: false, defaultVal: '10', description: 'Maximum ranked prompts to return per category' },
+        { name: 'userId', type: 'string', required: false, description: 'User identifier or Google email to resolve personalized isLiked status' },
+        { name: 'deviceId', type: 'string', required: false, description: 'Device installation UUID to resolve personalized isLiked status' },
+      ],
+    },
+    {
       id: 'get-prompt-detail',
       method: 'GET',
       path: '/api/v1/prompts/:id',
@@ -175,17 +191,17 @@ export default function ClientApisPage() {
       method: 'POST',
       path: '/api/v1/prompts/:id/action',
       category: 'Prompts',
-      summary: 'Register Client Engagement (Unique Like, View, Share)',
+      summary: 'Register Client Engagement (Unique Like, View, Copy, Share)',
       description:
-        'Allows client apps to register user engagement. Likes are strictly unique per user/device (calling like again prevents duplicate counting or toggles unlike). Views and shares increment engagement scores in real-time.',
+        'Allows client apps to register user engagement. Likes are strictly unique per user/device. Views have 15-minute client deduplication. Copies and shares increment counters and record timestamped activity rows to fuel the dynamic trending engine.',
       defaultTestPath: '/api/v1/prompts/full-stack-next-js-14-clean-architecture-prompter/action',
       params: [
         { name: 'id', type: 'string (path)', required: true, description: 'Prompt ID or URL slug' },
-        { name: 'type', type: 'string (body)', required: true, defaultVal: 'like', description: "'like' | 'unlike' | 'view' | 'share'" },
+        { name: 'type', type: 'string (body)', required: true, defaultVal: 'copy', description: "'copy' | 'like' | 'unlike' | 'view' | 'share'" },
         { name: 'userId', type: 'string (body)', required: false, description: 'User ID or Google email (enforces unique like)' },
         { name: 'deviceId', type: 'string (body)', required: false, description: 'Client device installation UUID' },
       ],
-      bodyExample: JSON.stringify({ type: 'like', userId: 'sarah.jenkins@gmail.com' }, null, 2),
+      bodyExample: JSON.stringify({ type: 'copy', userId: 'sarah.jenkins@gmail.com' }, null, 2),
     },
     {
       id: 'get-categories',

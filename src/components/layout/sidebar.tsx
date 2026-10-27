@@ -18,6 +18,7 @@ import {
   Radio,
   Code2,
   Star,
+  TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UserSession } from '@/types';
@@ -61,6 +62,11 @@ export function Sidebar({
       name: 'Featured',
       href: '/featured',
       icon: Star,
+    },
+    {
+      name: 'Trending',
+      href: '/trending',
+      icon: TrendingUp,
     },
     {
       name: 'Users',

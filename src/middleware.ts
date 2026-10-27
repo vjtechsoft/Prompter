@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 const TOKEN_COOKIE_NAME = 'prompt_auth_token';
 const SUPER_ADMIN_ONLY_PATHS = ['/admins', '/settings'];
-const PROTECTED_PATHS = ['/dashboard', '/prompts', '/categories', '/featured', '/users', '/profile', '/client-apis', ...SUPER_ADMIN_ONLY_PATHS];
+const PROTECTED_PATHS = ['/dashboard', '/prompts', '/categories', '/featured', '/trending', '/users', '/profile', '/client-apis', ...SUPER_ADMIN_ONLY_PATHS];
 
 function parseJwt(token: string): { id: string; email: string; role: string; exp?: number } | null {
   try {

@@ -468,7 +468,7 @@ export default function DashboardPage() {
                 <Flame className="w-5 h-5 text-orange-500" />
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">Trending Prompts</h3>
               </div>
-              <Link href="/prompts?sortBy=trending" className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+              <Link href="/trending" className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
                 View All
               </Link>
             </div>

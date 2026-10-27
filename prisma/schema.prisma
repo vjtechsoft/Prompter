@@ -85,6 +85,7 @@ model Prompt {
   likes         Int          @default(0)
   views         Int          @default(0)
   shares        Int          @default(0)
+  copies        Int          @default(0)
   isPremium     Boolean      @default(false)
   isFeatured    Boolean      @default(false)
   status        Boolean      @default(true)
@@ -92,6 +93,7 @@ model Prompt {
   createdById   String
   createdBy     User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
   promptLikes   PromptLike[]
+  promptActivities PromptActivity[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -241,4 +243,45 @@ model PromptLike {
   @@index([clientIdentifier])
   @@index([userId])
 }
+
+model PromptActivity {
+  id               String   @id @default(cuid())
+  promptId         String
+  prompt           Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  type             String   // "view", "like", "share", "copy"
+  clientIdentifier String?  // e.g. "user:123" or "device:abc" or "ip:1.2.3.4"
+  createdAt        DateTime @default(now())
+
+  @@index([promptId, type, createdAt])
+  @@index([type, createdAt])
+  @@index([createdAt])
+  @@index([promptId, createdAt])
+}
+
+model TrendingSetting {
+  id                    String   @id @default("default")
+  weightViews           Float    @default(1.0)
+  weightLikes           Float    @default(3.0)
+  weightCopies          Float    @default(5.0)
+  weightShares          Float    @default(4.0)
+  maxPromptsPerCategory Int      @default(10)
+  enableToday           Boolean  @default(true)
+  enableWeekly          Boolean  @default(true)
+  enableMonthly         Boolean  @default(true)
+  enableAllTime         Boolean  @default(true)
+  minScoreThreshold     Float    @default(0.0)
+  updatedAt             DateTime @updatedAt
+}
+
+model UploadedFile {
+  id        String   @id @default(cuid())
+  filename  String   @unique
+  mimeType  String
+  data      String   // Base64-encoded image data
+  size      Int
+  createdAt DateTime @default(now())
+
+  @@index([filename])
+}
+
 

@@ -21,7 +21,8 @@ Welcome to the **Prompter Client API** documentation. These endpoints are design
    - [4.5 Prompts Feed & Search (`GET /api/v1/prompts`)](#45-get-apiv1prompts)
    - [4.6 Prompt Detail (`GET /api/v1/prompts/:id`)](#46-get-apiv1promptsid)
    - [4.7 Register User Engagement (`POST /api/v1/prompts/:id/action`)](#47-post-apiv1promptsidaction)
-   - [4.8 User Profile & Google Sync (`POST /api/v1/users/sync`)](#48-post-apiv1userssync)
+   - [4.8 Dynamic Trending Prompts (`GET /api/v1/trending`)](#48-get-apiv1trending)
+   - [4.9 User Profile & Google Sync (`POST /api/v1/users/sync`)](#49-post-apiv1userssync)
 5. [Special Implementations](#5-special-implementations)
    - [Deterministic Non-Repeating Random Sorting](#deterministic-non-repeating-random-sorting)
    - [Ad Network Runtime Initialization](#ad-network-runtime-initialization)
@@ -435,15 +436,14 @@ Fetches complete details for a single prompt using either its database ID or URL
 ---
 
 ### 4.7 `POST /api/v1/prompts/:id/action`
-Records a user engagement interaction (`like`, `unlike`, `view`, `share`).
+Records a user engagement interaction (`like`, `unlike`, `view`, `copy`, `share`).
 
 > [!IMPORTANT]
-> **Unique Like Enforcement**: The backend enforces **strictly unique likes per client user / device**. A single user or device can only like a prompt once, preventing artificial like counter inflation.
-> - Pass `userId` (Google account email/ID) or `deviceId` (app installation UUID).
-> - Submitting `type: "like"` increments the like count **only if** this user has not already liked it.
-> - Submitting `type: "like"` again without toggle returns `{ isLiked: true, isUnique: false }` with **zero** count increment.
-> - Submitting `type: "unlike"` or `{ type: "like", toggle: true }` unlikes the prompt, decrements the counter by 1, and removes the unique like record.
-> - `share` and `view` actions atomically increment their respective counters.
+> **Dynamic Activity Tracking**: Every action (`like`, `unlike`, `view`, `copy`, `share`) records a timestamped `PromptActivity` row and updates prompt counters. These activity logs directly power the dynamic **Today**, **Weekly**, and **Monthly** trending calculations.
+> - **Unique Likes**: Pass `userId` or `deviceId`. Likes are strictly unique per user/device. Submitting `type: "like"` increments only once. Pass `type: "unlike"` or `toggle: true` to unlike.
+> - **Copy Action**: Pass `type: "copy"`. Atomically increments the `copies` counter and records an activity row.
+> - **View Deduplication**: Views have a 15-minute client-fingerprint deduplication window to prevent inflation from rapid reloads.
+> - **Share Action**: Atomically increments the `shares` counter and records an activity row.
 
 #### Path Parameters
 | Parameter | Type | Required | Description |
@@ -453,66 +453,163 @@ Records a user engagement interaction (`like`, `unlike`, `view`, `share`).
 #### Request Body (`application/json`)
 ```json
 {
-  "type": "like",
+  "type": "copy",
   "userId": "sarah.jenkins@gmail.com",
-  "deviceId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-  "toggle": true
+  "deviceId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
 }
 ```
 *Note: `userId` or `deviceId` can also be passed via `x-user-id` or `x-device-id` headers.*
 
 | Body Field | Type | Required | Description |
 |---|---|---|---|
-| `type` | string | Yes | Action type: `"like"`, `"unlike"`, `"share"`, `"view"` |
+| `type` | string | Yes | Action type: `"copy"`, `"like"`, `"unlike"`, `"share"`, `"view"` |
 | `userId` | string | Recommended | User identifier or Google email for authenticated users |
 | `deviceId` | string | Optional | Client device installation UUID for anonymous users |
 | `toggle` | boolean | Optional | If `true` and already liked, calling `"like"` will unlike the prompt |
 
-#### Response (`200 OK` - First Unique Like)
+#### Response (`200 OK` - Copy Action Recorded)
 ```json
 {
   "success": true,
-  "action": "like",
-  "isLiked": true,
-  "isUnique": true,
-  "message": "Prompt liked successfully",
+  "action": "copy",
+  "message": "Prompt copied",
   "data": {
     "id": "cmtl3wkpo000u8trf6k7s9b8v",
     "slug": "full-stack-next-js-14-clean-architecture-blueprint",
     "likes": 841,
     "views": 18200,
+    "copies": 532,
     "shares": 310,
     "isLiked": true,
     "trendingScore": 7678.4,
-    "popularScore": 19351
-  }
-}
-```
-
-#### Response (`200 OK` - Duplicate Like Prevented)
-```json
-{
-  "success": true,
-  "action": "like",
-  "isLiked": true,
-  "isUnique": false,
-  "message": "Prompt is already liked by this user/device",
-  "data": {
-    "id": "cmtl3wkpo000u8trf6k7s9b8v",
-    "slug": "full-stack-next-js-14-clean-architecture-blueprint",
-    "likes": 841,
-    "views": 18200,
-    "shares": 310,
-    "isLiked": true,
-    "trendingScore": 7678.4,
-    "popularScore": 19351
+    "popularScore": 19883
   }
 }
 ```
 
 ---
 
-### 4.8 `POST /api/v1/users/sync`
+### 4.8 `GET /api/v1/trending`
+Retrieves dynamically ranked trending prompts categorized across four separate timeframes:
+1. **Today Trending** – Prompts ranked by user activity since 00:00:00 of the current calendar day (using configured app timezone).
+2. **Weekly Trending** – Prompts ranked by activity since the start of the current week (ISO Monday 00:00:00).
+3. **Monthly Trending** – Prompts ranked by activity since the 1st day of the current calendar month (00:00:00).
+4. **All-Time Trending** – Prompts ranked by overall lifetime popularity since publication.
+
+> [!NOTE]
+> **Ranking Formula**:
+> $$\text{Score} = (\text{Views} \times W_v) + (\text{Likes} \times W_l) + (\text{Copies} \times W_c) + (\text{Shares} \times W_s)$$
+> *(Default weights: Views = 1.0, Likes = 3.0, Copies = 5.0, Shares = 4.0; configurable in Admin Panel).*  
+> Deleted, draft, inactive prompts, and prompts under inactive categories/subcategories are strictly excluded.
+
+#### Query Parameters
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `period` | string | No | `all` | Specific period: `"today"`, `"weekly"`, `"monthly"`, `"all_time"`. Omit to return all 4 categories in a single call. |
+| `limit` | integer | No | Admin config (10) | Maximum number of ranked prompts returned per category (max 100). |
+| `userId` | string | No | `null` | Google email or user ID to calculate personalized `isLiked` status. |
+| `deviceId` | string | No | `null` | Client device installation UUID to calculate personalized `isLiked` status. |
+
+#### Response (`200 OK` - All 4 Categories)
+```json
+{
+  "success": true,
+  "data": {
+    "today": {
+      "period": "today",
+      "title": "Today's Trending",
+      "startDate": "2026-10-27T00:00:00.000Z",
+      "prompts": [
+        {
+          "id": "cmtl3wkpo000u8trf6k7s9b8v",
+          "title": "Full-Stack Next.js 14 Clean Architecture Blueprint",
+          "slug": "full-stack-next-js-14-clean-architecture-blueprint",
+          "prompt": "Act as a Principal Software Architect...",
+          "featuredImage": "/uploads/nextjs-arch.png",
+          "category": {
+            "id": "cmtl3wkmy00048trf3otdjmh4",
+            "title": "Coding & Architecture",
+            "slug": "coding-architecture",
+            "image": "/uploads/coding.png"
+          },
+          "tags": ["nextjs", "react", "architecture"],
+          "likes": 841,
+          "views": 18200,
+          "shares": 310,
+          "copies": 532,
+          "isPremium": false,
+          "isFeatured": true,
+          "isLiked": true,
+          "score": 48.0,
+          "rank": 1,
+          "periodActivity": {
+            "views": 18,
+            "likes": 5,
+            "copies": 3,
+            "shares": 0
+          },
+          "createdAt": "2026-09-01T10:15:00.000Z"
+        }
+      ]
+    },
+    "weekly": {
+      "period": "weekly",
+      "title": "Weekly Trending",
+      "startDate": "2026-10-26T00:00:00.000Z",
+      "prompts": [ ... ]
+    },
+    "monthly": {
+      "period": "monthly",
+      "title": "Monthly Trending",
+      "startDate": "2026-10-01T00:00:00.000Z",
+      "prompts": [ ... ]
+    },
+    "all_time": {
+      "period": "all_time",
+      "title": "All-Time Trending",
+      "prompts": [ ... ]
+    }
+  },
+  "config": {
+    "maxPromptsPerCategory": 10,
+    "weights": {
+      "views": 1,
+      "likes": 3,
+      "copies": 5,
+      "shares": 4
+    }
+  }
+}
+```
+
+#### Response (`200 OK` - Single Period Query, e.g. `?period=today`)
+```json
+{
+  "success": true,
+  "period": "today",
+  "title": "Today's Trending",
+  "startDate": "2026-10-27T00:00:00.000Z",
+  "data": [
+    {
+      "id": "cmtl3wkpo000u8trf6k7s9b8v",
+      "title": "Full-Stack Next.js 14 Clean Architecture Blueprint",
+      "slug": "full-stack-next-js-14-clean-architecture-blueprint",
+      "score": 48.0,
+      "rank": 1,
+      "periodActivity": {
+        "views": 18,
+        "likes": 5,
+        "copies": 3,
+        "shares": 0
+      }
+    }
+  ]
+}
+```
+
+---
+
+### 4.9 `POST /api/v1/users/sync`
 Registers or synchronizes a client app end-user who signed in via **Google Sign-In**. If the user already exists, updates their display name, avatar, and last active timestamp. If the user was blocked by an administrator, returns HTTP `403 Forbidden`.
 
 #### Headers

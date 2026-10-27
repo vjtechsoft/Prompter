@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,28 @@ export async function GET(
 
     // Sanitize filename against directory traversal attacks
     const safeFilename = path.basename(filename);
+
+    // 1. Check PostgreSQL database first (serverless-compatible for Vercel)
+    try {
+      const dbFile = await prisma.uploadedFile.findUnique({
+        where: { filename: safeFilename },
+      });
+
+      if (dbFile && dbFile.data) {
+        const fileBuffer = Buffer.from(dbFile.data, 'base64');
+        return new NextResponse(fileBuffer, {
+          status: 200,
+          headers: {
+            'Content-Type': dbFile.mimeType || 'image/jpeg',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+          },
+        });
+      }
+    } catch (dbErr) {
+      // Fallback to disk if DB query fails or during offline dev
+    }
+
+    // 2. Fallback to local filesystem (for legacy/local development files)
     const filePath = path.join(process.cwd(), 'public', 'uploads', safeFilename);
 
     try {
