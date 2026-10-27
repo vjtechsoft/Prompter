@@ -378,62 +378,62 @@ export default function UsersPage() {
         </div>
 
         {/* KPI Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {/* Card 1: Total Users */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Users</span>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Users</span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : stats.totalUsers}
               </h3>
-              <span className="text-[11px] text-slate-400 mt-0.5 block">Registered client accounts</span>
+              <span className="text-[11px] text-slate-400 mt-1 block">Registered client accounts</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 flex items-center justify-center shadow-glow-indigo/20">
               <Users className="w-6 h-6" />
             </div>
           </div>
 
           {/* Card 2: Active Users */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Users</span>
-              <h3 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Users</span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : stats.activeUsers}
               </h3>
-              <span className="text-[11px] text-slate-400 mt-0.5 block">
+              <span className="text-[11px] text-slate-400 mt-1 block">
                 {stats.totalUsers > 0 ? `${Math.round((stats.activeUsers / stats.totalUsers) * 100)}% active rate` : '100% active'}
               </span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center">
               <CheckCircle2 className="w-6 h-6" />
             </div>
           </div>
 
           {/* Card 3: Blocked Users */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Blocked Users</span>
-              <h3 className="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Blocked Users</span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : stats.blockedUsers}
               </h3>
-              <span className="text-[11px] text-slate-400 mt-0.5 block">Suspended client accounts</span>
+              <span className="text-[11px] text-slate-400 mt-1 block">Suspended client accounts</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 border border-rose-500/20 flex items-center justify-center">
               <ShieldAlert className="w-6 h-6" />
             </div>
           </div>
 
           {/* Card 4: VIP Members */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">VIP Members</span>
-              <h3 className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">VIP Members</span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : stats.vipUsers}
                 <Crown className="w-5 h-5 text-amber-500 inline" />
               </h3>
-              <span className="text-[11px] text-slate-400 mt-0.5 block">Premium subscribers</span>
+              <span className="text-[11px] text-slate-400 mt-1 block">Premium subscribers</span>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center shadow-glow-amber/20">
               <Sparkles className="w-6 h-6" />
             </div>
           </div>

@@ -239,7 +239,7 @@ export default function LoginPage() {
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-              SQLite ACID Verified
+              PostgreSQL Enterprise Database
             </span>
           </div>
         </div>
@@ -447,7 +447,7 @@ export default function LoginPage() {
               Developer APIs
             </Link>
             <span>•</span>
-            <span className="text-slate-600">SQLite Single Node</span>
+            <span className="text-slate-600">PostgreSQL Powered</span>
           </div>
         </div>
       </div>

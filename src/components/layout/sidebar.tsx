@@ -15,7 +15,6 @@ import {
   ChevronRight,
   ShieldCheck,
   X,
-  Radio,
   Code2,
   Star,
   TrendingUp,
@@ -67,6 +66,8 @@ export function Sidebar({
       name: 'Trending',
       href: '/trending',
       icon: TrendingUp,
+      badge: 'Hot',
+      badgeColor: 'amber',
     },
     {
       name: 'Users',
@@ -77,7 +78,8 @@ export function Sidebar({
       name: 'Client APIs',
       href: '/client-apis',
       icon: Code2,
-      badge: 'Public',
+      badge: 'REST',
+      badgeColor: 'indigo',
     },
     ...(isSuperAdmin
       ? [
@@ -86,6 +88,7 @@ export function Sidebar({
             href: '/admins',
             icon: ShieldCheck,
             badge: 'Super',
+            badgeColor: 'purple',
           },
           {
             name: 'Settings',
@@ -112,22 +115,27 @@ export function Sidebar({
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-900 text-slate-800 dark:text-white select-none transition-colors duration-200">
+    <div className="flex flex-col h-full bg-white/95 dark:bg-[#0b0e1b]/90 backdrop-blur-2xl text-slate-800 dark:text-slate-200 select-none transition-all duration-300">
       {/* Brand Header */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200/80 dark:border-slate-800">
+      <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200/70 dark:border-white/5 relative">
         <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden group">
-          <img
-            src="/logo.png"
-            alt="Prompter"
-            className="w-9 h-9 object-contain shrink-0 group-hover:scale-105 transition-transform duration-200"
-          />
+          <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 p-0.5 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200 shrink-0">
+            <div className="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-indigo-400 group-hover:rotate-12 transition-transform duration-300" />
+            </div>
+          </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white">
-                Prompter
-              </span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium tracking-widest uppercase">
-                Admin Panel
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white leading-none">
+                  Prompter
+                </span>
+                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                  AI
+                </span>
+              </div>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wider uppercase mt-1">
+                Studio Platform
               </span>
             </div>
           )}
@@ -136,14 +144,20 @@ export function Sidebar({
         {/* Mobile close button */}
         <button
           onClick={onCloseMobile}
-          className="lg:hidden p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          aria-label="Close sidebar"
+          className="lg:hidden p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
       {/* Navigation List */}
-      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1.5">
+        {!collapsed && (
+          <div className="px-3 pb-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+            Workspace
+          </div>
+        )}
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive =
@@ -157,30 +171,35 @@ export function Sidebar({
               onClick={onCloseMobile}
               title={collapsed ? item.name : undefined}
               className={cn(
-                'group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
+                'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200',
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25 font-semibold'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  ? 'bg-gradient-to-r from-indigo-500/15 via-purple-500/10 to-transparent text-indigo-600 dark:text-white border border-indigo-500/30 shadow-[0_0_15px_-3px_rgba(99,102,241,0.2)]'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-white/[0.04] border border-transparent'
               )}
             >
+              {/* Active left indicator glow */}
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-r-full shadow-glow-indigo" />
+              )}
+
               <Icon
                 className={cn(
-                  'w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110',
+                  'w-4 h-4 shrink-0 transition-transform duration-200 group-hover:scale-110',
                   isActive
-                    ? 'text-white'
-                    : 'text-slate-400 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'
                 )}
               />
               {!collapsed && (
-                <span className="flex-1 truncate tracking-wide">{item.name}</span>
+                <span className="flex-1 truncate tracking-tight">{item.name}</span>
               )}
               {!collapsed && item.badge && (
                 <span
                   className={cn(
-                    'px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded border',
-                    isActive
-                      ? 'bg-white/20 text-white border-white/30'
-                      : 'bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-500/30'
+                    'px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-md border',
+                    item.badgeColor === 'amber' && 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25',
+                    item.badgeColor === 'purple' && 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/25',
+                    item.badgeColor === 'indigo' && 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/25'
                   )}
                 >
                   {item.badge}
@@ -193,47 +212,40 @@ export function Sidebar({
 
       {/* Role Banner / Profile Quick Card */}
       {!collapsed && (
-        <div className="px-4 py-3 mx-3 mb-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 transition-colors">
-          <div className="flex items-center gap-2 mb-1">
-            <ShieldCheck
-              className={cn(
-                'w-4 h-4',
-                isSuperAdmin
-                  ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-indigo-600 dark:text-indigo-400'
-              )}
-            />
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-200">
-              {isSuperAdmin ? 'Super Admin Mode' : 'Admin Mode'}
-            </span>
+        <div className="px-3 pb-2">
+          <div className="p-3 rounded-2xl bg-slate-100/80 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/5 transition-colors">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
+              <span className="text-[11px] font-bold text-slate-800 dark:text-white tracking-tight">
+                {isSuperAdmin ? 'Super Administrator' : 'Administrator'}
+              </span>
+            </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+              {user?.email || 'admin@prompter.com'}
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-            {isSuperAdmin
-              ? 'Full system access & settings'
-              : 'Prompt & category management'}
-          </p>
         </div>
       )}
 
       {/* Footer / Toggle & Logout */}
-      <div className="p-3 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
+      <div className="p-3 border-t border-slate-200/70 dark:border-white/5 flex items-center justify-between gap-2">
         <button
           onClick={handleLogout}
           title="Sign Out"
           className={cn(
-            'flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 dark:hover:text-rose-300 transition-colors w-full',
+            'flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-300 transition-colors flex-1',
             collapsed && 'justify-center px-0'
           )}
         >
           <LogOut className="w-4 h-4 shrink-0" />
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span>Sign Out</span>}
         </button>
 
         {/* Desktop Collapse Toggle */}
         <button
           onClick={onToggleCollapse}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-1 shrink-0"
+          className="hidden lg:flex items-center justify-center w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors shrink-0"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -246,7 +258,7 @@ export function Sidebar({
       {/* Desktop Persistent Sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col shrink-0 border-r border-slate-200/80 dark:border-slate-800 transition-all duration-300 ease-in-out',
+          'hidden lg:flex flex-col shrink-0 border-r border-slate-200/70 dark:border-white/5 transition-all duration-300 ease-in-out z-20',
           collapsed ? 'w-20' : 'w-64'
         )}
       >
@@ -258,7 +270,7 @@ export function Sidebar({
         <div className="fixed inset-0 z-50 lg:hidden flex">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity"
             onClick={onCloseMobile}
           />
           {/* Slide-out Panel */}

@@ -387,13 +387,15 @@ export default function CategoriesPage() {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-              <FolderTree className="w-7 h-7 text-indigo-600" />
-              Category & Subcategory Management
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/70 dark:border-white/5">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <div className="p-2 rounded-2xl bg-purple-500/10 text-purple-500 border border-purple-500/20 shadow-sm">
+                <FolderTree className="w-6 h-6 text-purple-500 dark:text-purple-400" />
+              </div>
+              <span>Category & Subcategory Taxonomy</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
               Organize prompt taxonomy with parent categories and nested subcategories, cover artwork, and display order.
             </p>
           </div>
@@ -401,13 +403,13 @@ export default function CategoriesPage() {
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <button
               onClick={() => openCreateSubModal()}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/60 dark:hover:bg-teal-900/60 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-semibold transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-teal-500/10 hover:bg-teal-500/15 text-teal-600 dark:text-teal-300 border border-teal-500/25 text-xs font-bold transition-all shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" /> Add Subcategory
             </button>
             <button
               onClick={openCreateModal}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <Plus className="w-4 h-4" /> Add Category
             </button>
@@ -415,7 +417,7 @@ export default function CategoriesPage() {
         </div>
 
         {/* Toolbar */}
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="p-5 rounded-3xl glass-card flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="relative w-full sm:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -458,11 +460,11 @@ export default function CategoriesPage() {
         </div>
 
         {/* Categories & Subcategories Table */}
-        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="rounded-3xl glass-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                <tr className="border-b border-slate-200/80 dark:border-white/5 bg-slate-50/80 dark:bg-white/[0.02] text-slate-400 font-bold uppercase tracking-wider text-[10px]">
                   <th className="py-4 px-3 w-16 text-center">Order</th>
                   <th className="py-4 px-3 w-16">Image</th>
                   <th className="py-4 px-3">Title & Slug</th>

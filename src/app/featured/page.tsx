@@ -258,59 +258,59 @@ export default function FeaturedPage() {
         </div>
 
         {/* Analytics KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Featured Prompts</span>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Featured Prompts</span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : stats.totalFeaturedPrompts}
               </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-400 mt-1">
                 out of {stats.totalPromptsCatalog || 0} total prompts
               </p>
             </div>
-            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-500">
+            <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 shadow-glow-amber/20">
               <Sparkles className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Featured Categories</span>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Featured Categories</span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : stats.totalFeaturedCategories}
               </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
+              <p className="text-[11px] text-slate-400 mt-1">
                 out of {stats.totalCategoriesCatalog || 0} total categories
               </p>
             </div>
-            <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-500">
+            <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shadow-glow-indigo/20">
               <FolderTree className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Featured Total Likes</span>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Featured Total Likes</span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : formatCompactNumber(stats.featuredPromptLikes || 0)}
               </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">community applause</p>
+              <p className="text-[11px] text-slate-400 mt-1">community applause</p>
             </div>
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-500">
+            <div className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
               <Heart className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between">
+          <div className="p-5 rounded-3xl glass-card glass-card-hover flex items-center justify-between">
             <div>
-              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Featured Total Views</span>
-              <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Featured Total Views</span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 tracking-tight">
                 {loading ? <Skeleton className="h-8 w-16" /> : formatCompactNumber(stats.featuredPromptViews || 0)}
               </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">client impressions</p>
+              <p className="text-[11px] text-slate-400 mt-1">client impressions</p>
             </div>
-            <div className="p-3 rounded-xl bg-teal-50 dark:bg-teal-950/50 text-teal-500">
+            <div className="p-3 rounded-2xl bg-teal-500/10 text-teal-500 border border-teal-500/20">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>

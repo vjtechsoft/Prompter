@@ -192,11 +192,13 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-              <User className="w-7 h-7 text-indigo-600" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+              <span className="p-2.5 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shadow-glow-indigo">
+                <User className="w-6 h-6" />
+              </span>
               My Account Profile
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
               Manage personal credentials, security keys, and inspect recent authentication logs.
             </p>
           </div>
@@ -204,7 +206,7 @@ export default function ProfilePage() {
           {profile?.role !== 'SUPER_ADMIN' && (
             <button
               onClick={handleDeleteSelf}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-200 dark:border-rose-900 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-semibold text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-colors"
             >
               <Trash2 className="w-4 h-4" /> Delete Account
             </button>
@@ -214,7 +216,7 @@ export default function ProfilePage() {
         {/* Profile Card & Password Form Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Profile Information */}
-          <form onSubmit={handleUpdateProfile} className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-5">
+          <form onSubmit={handleUpdateProfile} className="glass-card rounded-3xl p-6 sm:p-7 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 Profile Information
@@ -296,7 +298,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={updatingProfile}
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-50 flex items-center gap-1.5 transition-all active:scale-95"
               >
                 {updatingProfile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                 Save Profile
@@ -305,7 +307,7 @@ export default function ProfilePage() {
           </form>
 
           {/* Change Password */}
-          <form onSubmit={handleChangePassword} className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+          <form onSubmit={handleChangePassword} className="glass-card rounded-3xl p-6 sm:p-7 space-y-4">
             <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 Security & Password
@@ -370,7 +372,7 @@ export default function ProfilePage() {
               <button
                 type="submit"
                 disabled={updatingPassword}
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/20 disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-50 flex items-center gap-1.5 transition-all active:scale-95"
               >
                 {updatingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                 Update Password
@@ -382,7 +384,7 @@ export default function ProfilePage() {
         {/* Audit Trail: Activity Logs & Login History Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Activity Log */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col">
+          <div className="glass-card rounded-3xl p-6 sm:p-7 flex flex-col">
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 mb-3">
               <Activity className="w-4 h-4 text-indigo-500" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -397,7 +399,7 @@ export default function ProfilePage() {
                 activityLogs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 text-xs space-y-1"
+                    className="p-3.5 rounded-2xl bg-slate-500/5 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/5 text-xs space-y-1"
                   >
                     <div className="flex items-center justify-between font-semibold text-slate-900 dark:text-white">
                       <span>{log.action}</span>
@@ -415,7 +417,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Login History */}
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col">
+          <div className="glass-card rounded-3xl p-6 sm:p-7 flex flex-col">
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3 mb-3">
               <Laptop className="w-4 h-4 text-blue-500" />
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -430,7 +432,7 @@ export default function ProfilePage() {
                 loginLogs.map((log) => (
                   <div
                     key={log.id}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700/60 text-xs flex items-center justify-between"
+                    className="p-3.5 rounded-2xl bg-slate-500/5 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/5 text-xs flex items-center justify-between"
                   >
                     <div>
                       <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">

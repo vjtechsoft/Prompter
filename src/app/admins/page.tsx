@@ -166,11 +166,13 @@ export default function AdminsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-              <Users className="w-7 h-7 text-indigo-600" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+              <span className="p-2.5 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shadow-glow-indigo">
+                <Users className="w-6 h-6" />
+              </span>
               Administrator Accounts
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
               Role-Based Access Control: 1 Super Admin and up to 4 Administrator accounts.
             </p>
           </div>
@@ -178,12 +180,12 @@ export default function AdminsPage() {
           {meta.availableSlots > 0 ? (
             <button
               onClick={() => setCreateModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 transition-all self-start sm:self-auto"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all self-start sm:self-auto active:scale-95"
             >
               <Plus className="w-4 h-4" /> Add Admin ({meta.availableSlots} slots left)
             </button>
           ) : (
-            <div className="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 text-xs font-semibold">
+            <div className="px-4 py-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold backdrop-blur-md">
               Maximum 4 Admins Reached
             </div>
           )}
@@ -191,42 +193,51 @@ export default function AdminsPage() {
 
         {/* Quota Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Super Administrator</span>
-              <ShieldCheck className="w-5 h-5 text-emerald-500" />
+          <div className="glass-card glass-card-hover rounded-3xl p-5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors" />
+            <div className="flex items-center justify-between relative z-10">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Super Administrator</span>
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">1 / 1</div>
-            <div className="mt-1 text-[11px] text-emerald-600 font-medium">System owner (immutable)</div>
+            <div className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white relative z-10">1 / 1</div>
+            <div className="mt-1 text-[11px] text-emerald-500 font-medium relative z-10">System owner (immutable)</div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Admins Provisioned</span>
-              <Users className="w-5 h-5 text-indigo-500" />
+          <div className="glass-card glass-card-hover rounded-3xl p-5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl group-hover:bg-indigo-500/10 transition-colors" />
+            <div className="flex items-center justify-between relative z-10">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Admins Provisioned</span>
+              <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                <Users className="w-5 h-5" />
+              </div>
             </div>
-            <div className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
+            <div className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white relative z-10">
               {meta.totalAdmins} / 4
             </div>
-            <div className="mt-1 text-[11px] text-indigo-600 font-medium">
+            <div className="mt-1 text-[11px] text-indigo-500 font-medium relative z-10">
               {meta.availableSlots} slot(s) remaining
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Admin Permissions</span>
-              <Shield className="w-5 h-5 text-purple-500" />
+          <div className="glass-card glass-card-hover rounded-3xl p-5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-xl group-hover:bg-purple-500/10 transition-colors" />
+            <div className="flex items-center justify-between relative z-10">
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Admin Permissions</span>
+              <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500 border border-purple-500/20">
+                <Shield className="w-5 h-5" />
+              </div>
             </div>
-            <div className="mt-2 text-sm font-bold text-slate-900 dark:text-white">
+            <div className="mt-3 text-base font-bold text-slate-900 dark:text-white relative z-10">
               Prompts & Categories
             </div>
-            <div className="mt-1 text-[11px] text-slate-400">Settings & Ads restricted</div>
+            <div className="mt-1 text-[11px] text-slate-400 relative z-10">Settings & Ads restricted</div>
           </div>
         </div>
 
         {/* Table */}
-        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="rounded-3xl glass-card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
@@ -299,7 +310,7 @@ export default function AdminsPage() {
                         </td>
                         <td className="py-3 px-3 text-center">
                           <span className="text-xs text-slate-600 dark:text-slate-300">
-                            {adm._count?.prompts || 0} prompts • {adm._count?.categories || 0} categories
+                            {adm._count?.prompts || 0} prompts â€¢ {adm._count?.categories || 0} categories
                           </span>
                         </td>
                         <td className="py-3 px-3">
@@ -400,7 +411,7 @@ export default function AdminsPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                   className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
