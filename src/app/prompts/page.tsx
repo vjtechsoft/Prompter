@@ -301,18 +301,13 @@ export default function PromptsPage() {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/70 dark:border-white/5">
-          <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-              <div className="p-2 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shadow-sm">
-                <Sparkles className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
-              </div>
-              <span>{viewTrash ? 'Prompt Trash Repository' : 'Prompt Repository'}</span>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                {total} Prompts
-              </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <Sparkles className="w-7 h-7 text-indigo-600" />
+              Prompt Repository
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Manage, categorize, preview, and analyze AI prompt templates.
             </p>
           </div>
@@ -323,34 +318,34 @@ export default function PromptsPage() {
                 setViewTrash(!viewTrash);
                 setPage(1);
               }}
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-bold border transition-all ${
+              className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
                 viewTrash
-                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400 shadow-sm'
-                  : 'bg-white/80 dark:bg-white/[0.04] border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08]'
+                  ? 'bg-rose-50 border-rose-300 text-rose-700 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-300'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+              <Trash2 className="w-4 h-4 text-rose-500" />
               {viewTrash ? 'Exit Trash' : 'Trash'}
             </button>
 
             {/* Export options */}
             <button
               onClick={handleExportCSV}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08] text-xs font-semibold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors"
               title="Export to CSV"
             >
               <FileText className="w-3.5 h-3.5 text-blue-500" /> CSV
             </button>
             <button
               onClick={handleExportExcel}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08] text-xs font-semibold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors"
               title="Export to Excel"
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" /> Excel
             </button>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08] text-xs font-semibold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold transition-colors"
               title="Print Table"
             >
               <Printer className="w-3.5 h-3.5 text-purple-500" /> Print
@@ -358,7 +353,7 @@ export default function PromptsPage() {
 
             <Link
               href="/prompts/new"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 transition-all"
             >
               <Plus className="w-4 h-4" /> Add Prompt
             </Link>
@@ -366,7 +361,7 @@ export default function PromptsPage() {
         </div>
 
         {/* Filter & Search Toolbar */}
-        <div className="p-5 rounded-3xl glass-card space-y-4">
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Search Input */}
             <div className="relative lg:col-span-2">
@@ -569,11 +564,11 @@ export default function PromptsPage() {
         </div>
 
         {/* Table Container */}
-        <div className="rounded-3xl glass-card overflow-hidden">
+        <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200/80 dark:border-white/5 bg-slate-50/80 dark:bg-white/[0.02] text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
                   <th className="p-4 w-10 text-center">
                     <input
                       type="checkbox"

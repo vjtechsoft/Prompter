@@ -47,40 +47,36 @@ export function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-      {/* Frosted Glass Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-md transition-opacity duration-300 animate-in fade-in"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in"
         onClick={onClose}
       />
 
-      {/* Modal Dialog with subtle glowing border */}
+      {/* Modal Dialog */}
       <div
         className={cn(
-          'relative w-full bg-white/95 dark:bg-[#0c101c]/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-slate-200/80 dark:border-white/10 overflow-hidden z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 shadow-glow-indigo/10',
+          'relative w-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden z-10 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200',
           maxWidthClasses[maxWidth]
         )}
       >
-        {/* Subtle Ambient Radial Highlight at top of modal */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-gradient-to-b from-indigo-500/10 dark:from-indigo-500/20 to-transparent pointer-events-none rounded-t-3xl" />
-
-        <div className="relative flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
           <div>
-            <h3 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">{title}</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>
             {description && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{description}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{description}</p>
             )}
           </div>
           <button
             onClick={onClose}
-            aria-label="Close dialog"
-            className="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all duration-150"
+            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="relative p-6 overflow-y-auto">{children}</div>
+        <div className="p-6 overflow-y-auto">{children}</div>
       </div>
     </div>
   );

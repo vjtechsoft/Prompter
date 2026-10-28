@@ -6,7 +6,6 @@ import { Header } from './header';
 import { GlobalSearchModal } from '@/components/search/global-search-modal';
 import { UserSession } from '@/types';
 import { useRouter } from 'next/navigation';
-import { Sparkles } from 'lucide-react';
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserSession | null>(null);
@@ -50,31 +49,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#070913] relative overflow-hidden">
-        {/* Ambient background glow */}
-        <div className="absolute w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none animate-pulse-slow" />
-        <div className="relative z-10 flex flex-col items-center gap-4">
-          <div className="relative flex items-center justify-center">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 p-0.5 shadow-glow-indigo">
-              <div className="w-full h-full bg-[#070913] rounded-[14px] flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-indigo-400 animate-spin" />
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-sm font-bold tracking-tight text-slate-800 dark:text-white">Prompter Studio</span>
-            <span className="text-xs text-slate-400">Loading workspace...</span>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-medium text-slate-500">Loading Prompter Admin...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-[#070913] relative">
-      {/* Background ambient radial lighting */}
-      <div className="ambient-glow" />
-
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
       {/* Sidebar */}
       <Sidebar
         user={user}
@@ -85,7 +70,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       />
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative z-10">
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Header
           user={user}
           onOpenSidebar={() => setMobileOpen(true)}
@@ -93,7 +78,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto space-y-6 pb-12">{children}</div>
+          <div className="max-w-7xl mx-auto space-y-6">{children}</div>
         </main>
       </div>
 

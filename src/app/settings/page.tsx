@@ -259,28 +259,26 @@ export default function SettingsPage() {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/70 dark:border-white/5">
-          <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-              <div className="p-2 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shadow-sm">
-                <Settings className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
-              </div>
-              <span>System Settings & Integrations</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+              <Settings className="w-7 h-7 text-indigo-600" />
+              System Settings & Integrations
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Configure monetization networks, OneSignal notifications, application branding, and legal links.
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Configure monetization, push notifications, application identity, and legal endpoints.
             </p>
           </div>
         </div>
 
         {/* Tab Selection Navigation */}
-        <div className="flex flex-wrap gap-2 p-2 rounded-3xl glass-card">
+        <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
           <button
             onClick={() => setActiveTab('ads')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'ads'
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Radio className="w-4 h-4" /> Advertisements
@@ -288,10 +286,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'notifications'
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <Bell className="w-4 h-4" /> Push Notifications
@@ -299,32 +297,32 @@ export default function SettingsPage() {
 
           <button
             onClick={() => setActiveTab('app')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'app'
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
-            <Smartphone className="w-4 h-4" /> App Branding
+            <Smartphone className="w-4 h-4" /> App Settings
           </button>
 
           <button
             onClick={() => setActiveTab('urls')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
               activeTab === 'urls'
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.04]'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
-            <Link2 className="w-4 h-4" /> App URLs & Legal
+            <Link2 className="w-4 h-4" /> App URLs & Socials
           </button>
         </div>
 
         {/* Tab 1: Advertisements Management */}
         {activeTab === 'ads' && (
           <form onSubmit={handleSaveAds} className="space-y-6">
-            <div className="p-6 sm:p-7 rounded-3xl glass-card space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-3">
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                     Active Ad Network Provider

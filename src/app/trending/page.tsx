@@ -300,24 +300,24 @@ export default function TrendingPage() {
         </div>
 
         {/* 4 Category Metric KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Today Trending */}
           <div
             onClick={() => setActiveTab('today')}
-            className={`p-5 rounded-3xl border transition-all cursor-pointer glass-card glass-card-hover ${
+            className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
               activeTab === 'today'
-                ? 'bg-gradient-to-br from-orange-500/15 via-amber-500/5 to-transparent border-orange-500/40 ring-1 ring-orange-500/30 shadow-glow-amber/20'
-                : 'border-slate-200/80 dark:border-white/5'
+                ? 'bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent border-orange-500/40 ring-1 ring-orange-500/30 dark:bg-orange-950/20'
+                : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-2.5 rounded-2xl bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                <span className="p-2 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
                   <Flame className="w-4 h-4" />
                 </span>
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Today</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">Today</span>
               </div>
-              <span className="text-[11px] font-bold text-slate-400 font-mono">
+              <span className="text-[11px] font-semibold text-slate-400 font-mono">
                 {activityStats.todayCount} events
               </span>
             </div>
@@ -325,7 +325,7 @@ export default function TrendingPage() {
               <div className="text-2xl font-black text-slate-900 dark:text-white">
                 {todayPrompts.length > 0 ? `#1: ${todayPrompts[0].score}` : '0'}
               </div>
-              <span className="text-xs text-orange-600 dark:text-orange-400 font-bold">
+              <span className="text-xs text-orange-600 dark:text-orange-400 font-semibold">
                 {todayPrompts.length} ranked
               </span>
             </div>
@@ -337,20 +337,20 @@ export default function TrendingPage() {
           {/* Card 2: Weekly Trending */}
           <div
             onClick={() => setActiveTab('weekly')}
-            className={`p-5 rounded-3xl border transition-all cursor-pointer glass-card glass-card-hover ${
+            className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
               activeTab === 'weekly'
-                ? 'bg-gradient-to-br from-indigo-500/15 via-purple-500/5 to-transparent border-indigo-500/40 ring-1 ring-indigo-500/30 shadow-glow-indigo/20'
-                : 'border-slate-200/80 dark:border-white/5'
+                ? 'bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border-indigo-500/40 ring-1 ring-indigo-500/30 dark:bg-indigo-950/20'
+                : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-2.5 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                <span className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
                   <Calendar className="w-4 h-4" />
                 </span>
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">This Week</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">This Week</span>
               </div>
-              <span className="text-[11px] font-bold text-slate-400 font-mono">
+              <span className="text-[11px] font-semibold text-slate-400 font-mono">
                 {activityStats.weeklyCount} events
               </span>
             </div>
@@ -358,7 +358,7 @@ export default function TrendingPage() {
               <div className="text-2xl font-black text-slate-900 dark:text-white">
                 {weeklyPrompts.length > 0 ? `#1: ${weeklyPrompts[0].score}` : '0'}
               </div>
-              <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">
+              <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
                 {weeklyPrompts.length} ranked
               </span>
             </div>
@@ -370,20 +370,20 @@ export default function TrendingPage() {
           {/* Card 3: Monthly Trending */}
           <div
             onClick={() => setActiveTab('monthly')}
-            className={`p-5 rounded-3xl border transition-all cursor-pointer glass-card glass-card-hover ${
+            className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
               activeTab === 'monthly'
-                ? 'bg-gradient-to-br from-emerald-500/15 via-teal-500/5 to-transparent border-emerald-500/40 ring-1 ring-emerald-500/30 shadow-sm'
-                : 'border-slate-200/80 dark:border-white/5'
+                ? 'bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent border-emerald-500/40 ring-1 ring-emerald-500/30 dark:bg-emerald-950/20'
+                : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <span className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
                   <CalendarRange className="w-4 h-4" />
                 </span>
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">This Month</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">This Month</span>
               </div>
-              <span className="text-[11px] font-bold text-slate-400 font-mono">
+              <span className="text-[11px] font-semibold text-slate-400 font-mono">
                 {activityStats.monthlyCount} events
               </span>
             </div>
@@ -391,7 +391,7 @@ export default function TrendingPage() {
               <div className="text-2xl font-black text-slate-900 dark:text-white">
                 {monthlyPrompts.length > 0 ? `#1: ${monthlyPrompts[0].score}` : '0'}
               </div>
-              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                 {monthlyPrompts.length} ranked
               </span>
             </div>
@@ -403,20 +403,20 @@ export default function TrendingPage() {
           {/* Card 4: All-Time Trending */}
           <div
             onClick={() => setActiveTab('all_time')}
-            className={`p-5 rounded-3xl border transition-all cursor-pointer glass-card glass-card-hover ${
+            className={`p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer shadow-sm hover:shadow-md ${
               activeTab === 'all_time'
-                ? 'bg-gradient-to-br from-amber-500/15 via-yellow-500/5 to-transparent border-amber-500/40 ring-1 ring-amber-500/30 shadow-glow-amber/20'
-                : 'border-slate-200/80 dark:border-white/5'
+                ? 'bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-transparent border-amber-500/40 ring-1 ring-amber-500/30 dark:bg-amber-950/20'
+                : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                <span className="p-2 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
                   <Trophy className="w-4 h-4" />
                 </span>
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">All-Time</span>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">All-Time</span>
               </div>
-              <span className="text-[11px] font-bold text-slate-400 font-mono">
+              <span className="text-[11px] font-semibold text-slate-400 font-mono">
                 Lifetime Metrics
               </span>
             </div>
@@ -424,7 +424,7 @@ export default function TrendingPage() {
               <div className="text-2xl font-black text-slate-900 dark:text-white">
                 {allTimePrompts.length > 0 ? `#1: ${allTimePrompts[0].score}` : '0'}
               </div>
-              <span className="text-xs text-amber-600 dark:text-amber-400 font-bold">
+              <span className="text-xs text-amber-600 dark:text-amber-400 font-semibold">
                 {allTimePrompts.length} ranked
               </span>
             </div>
@@ -505,7 +505,7 @@ export default function TrendingPage() {
             </div>
 
             {/* Prompts Ranking Table */}
-            <div className="rounded-3xl glass-card overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
               {loading ? (
                 <div className="p-8 space-y-4">
                   {[...Array(5)].map((_, i) => (

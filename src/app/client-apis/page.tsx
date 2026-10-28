@@ -472,7 +472,7 @@ export default function ClientApisPage() {
     <AdminLayout>
       <div className="space-y-8 pb-12">
         {/* Header & Hero */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900/90 via-indigo-950/70 to-slate-900/90 p-6 sm:p-8 text-white border border-indigo-500/20 backdrop-blur-xl shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white border border-slate-800 shadow-xl">
           <div className="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute right-32 -bottom-16 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -489,13 +489,13 @@ export default function ClientApisPage() {
 
             {/* Base URL bar */}
             <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-800/80 border border-slate-700/80 text-xs font-mono text-indigo-300 w-full sm:w-auto">
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs font-mono text-indigo-300 w-full sm:w-auto">
                 <span className="text-slate-400 select-none">Base URL:</span>
                 <span className="font-semibold text-white truncate">{baseUrl}</span>
               </div>
               <button
                 onClick={handleCopyBase}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/30 transition-all active:scale-95"
               >
                 {copiedBase ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
                 {copiedBase ? 'Copied!' : 'Copy Base URL'}
@@ -505,7 +505,7 @@ export default function ClientApisPage() {
         </div>
 
         {/* Client API Key Security Management Panel */}
-        <div className="rounded-3xl glass-card p-6 sm:p-8 space-y-6">
+        <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
