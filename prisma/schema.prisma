@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,10 +13,10 @@ model User {
   email            String        @unique
   password         String
   role             String        @default("ADMIN") // "SUPER_ADMIN" or "ADMIN"
-  avatar           String?
+  avatar           String?       @db.Text
   status           String        @default("ACTIVE") // "ACTIVE" or "INACTIVE"
-  rememberToken    String?
-  resetToken       String?
+  rememberToken    String?       @db.Text
+  resetToken       String?       @db.Text
   resetTokenExpiry DateTime?
   lastLoginAt      DateTime?
   lastLoginIp      String?
@@ -35,7 +35,7 @@ model Category {
   id            String        @id @default(cuid())
   title         String        @unique
   slug          String        @unique
-  image         String
+  image         String        @db.Text
   status        Boolean       @default(true)
   isFeatured    Boolean       @default(false)
   position      Int           @default(0)
@@ -54,7 +54,7 @@ model Subcategory {
   id          String   @id @default(cuid())
   title       String
   slug        String   @unique
-  image       String?
+  image       String?  @db.Text
   status      Boolean  @default(true)
   position    Int      @default(0)
   categoryId  String
@@ -72,68 +72,68 @@ model Subcategory {
 }
 
 model Prompt {
-  id            String       @id @default(cuid())
-  title         String       @unique
-  slug          String       @unique
-  prompt        String
-  featuredImage String
-  categoryId    String
-  category      Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  subcategoryId String?
-  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
-  tags          String       @default("[]") // JSON string of tags
-  likes         Int          @default(0)
-  views         Int          @default(0)
-  shares        Int          @default(0)
-  copies        Int          @default(0)
-  isPremium     Boolean      @default(false)
-  isFeatured    Boolean      @default(false)
-  status        Boolean      @default(true)
-  isDeleted     Boolean      @default(false) // Soft delete
-  createdById   String
-  createdBy     User         @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  promptLikes   PromptLike[]
+  id               String           @id @default(cuid())
+  title            String           @unique
+  slug             String           @unique
+  prompt           String           @db.Text
+  featuredImage    String           @db.Text
+  categoryId       String
+  category         Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subcategoryId    String?
+  subcategory      Subcategory?     @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  tags             String           @default("[]") @db.Text
+  likes            Int              @default(0)
+  views            Int              @default(0)
+  shares           Int              @default(0)
+  copies           Int              @default(0)
+  isPremium        Boolean          @default(false)
+  isFeatured       Boolean          @default(false)
+  status           Boolean          @default(true)
+  isDeleted        Boolean          @default(false)
+  createdById      String
+  createdBy        User             @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  promptLikes      PromptLike[]
   promptActivities PromptActivity[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   @@index([subcategoryId])
   @@index([isFeatured])
 }
 
 model Advertisement {
-  id                       String   @id @default("default")
-  activeProvider           String   @default("ADMOB") // ADMOB, META, UNITY, NONE
-  interstitialInterval     Int      @default(3) // Interval counter for interstitial ads (e.g. trigger after every X actions/clicks)
-  nativeInterval           Int      @default(5) // Interval counter for native ads (e.g. place ad card after every Y items in list)
-  admobEnabled             Boolean  @default(true)
-  admobAppId               String   @default("")
-  admobBannerId            String   @default("")
-  admobInterstitialId      String   @default("")
-  admobRewardedId          String   @default("")
-  admobNativeId            String   @default("")
-  admobAppOpenId           String   @default("")
-  metaEnabled              Boolean  @default(false)
-  metaBannerId             String   @default("")
-  metaInterstitialId       String   @default("")
-  metaRewardedId           String   @default("")
-  metaNativeId             String   @default("")
-  unityEnabled             Boolean  @default(false)
-  unityGameId              String   @default("")
-  unityBannerPlacement     String   @default("")
-  unityInterstitialPlacement String @default("")
-  unityRewardedPlacement   String   @default("")
-  updatedAt                DateTime @updatedAt
+  id                         String   @id @default("default")
+  activeProvider             String   @default("ADMOB")
+  interstitialInterval       Int      @default(3)
+  nativeInterval             Int      @default(5)
+  admobEnabled               Boolean  @default(true)
+  admobAppId                 String   @default("")
+  admobBannerId              String   @default("")
+  admobInterstitialId        String   @default("")
+  admobRewardedId            String   @default("")
+  admobNativeId              String   @default("")
+  admobAppOpenId             String   @default("")
+  metaEnabled                Boolean  @default(false)
+  metaBannerId               String   @default("")
+  metaInterstitialId         String   @default("")
+  metaRewardedId             String   @default("")
+  metaNativeId               String   @default("")
+  unityEnabled               Boolean  @default(false)
+  unityGameId                String   @default("")
+  unityBannerPlacement       String   @default("")
+  unityInterstitialPlacement String   @default("")
+  unityRewardedPlacement     String   @default("")
+  updatedAt                  DateTime @updatedAt
 }
 
 model NotificationSetting {
   id               String   @id @default("default")
-  provider         String   @default("FCM") // "FCM" | "ONESIGNAL"
+  provider         String   @default("FCM")
   fcmProjectId     String   @default("")
   fcmClientEmail   String   @default("")
-  fcmPrivateKey    String   @default("") // for Google OAuth2 / FCM HTTP v1 API
-  fcmServerKey     String   @default("") // legacy / web push fallback
-  fcmTopic         String   @default("all_users") // broadcast topic
+  fcmPrivateKey    String   @default("") @db.Text
+  fcmServerKey     String   @default("") @db.Text
+  fcmTopic         String   @default("all_users")
   oneSignalAppId   String   @default("")
   oneSignalRestKey String   @default("")
   isEnabled        Boolean  @default(false)
@@ -143,17 +143,17 @@ model NotificationSetting {
 model Notification {
   id           String    @id @default(cuid())
   title        String
-  message      String
-  image        String?
-  deepLink     String?
+  message      String    @db.Text
+  image        String?   @db.Text
+  deepLink     String?   @db.Text
   targetTopic  String?   @default("all_users")
   sendToAll    Boolean   @default(true)
   scheduledAt  DateTime?
   sentAt       DateTime?
-  status       String    @default("SENT") // SENT, SCHEDULED, DRAFT, FAILED
+  status       String    @default("SENT")
   successCount Int       @default(0)
   failureCount Int       @default(0)
-  errorMessage String?
+  errorMessage String?   @db.Text
   createdById  String
   createdBy    User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
@@ -163,16 +163,16 @@ model Notification {
 }
 
 model FcmDeviceToken {
-  id          String   @id @default(cuid())
-  token       String   @unique
-  deviceId    String?  // Hardware UUID from client device
-  userId      String?  // Optional AppUser ID if authenticated
-  platform    String?  // "android", "ios", "flutter", "web"
-  appVersion  String?
-  isActive    Boolean  @default(true)
-  lastSeenAt  DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  token      String   @unique
+  deviceId   String?
+  userId     String?
+  platform   String?
+  appVersion String?
+  isActive   Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([token])
   @@index([deviceId])
@@ -198,28 +198,28 @@ model AppSettings {
   maintenanceMode Boolean  @default(false)
   clientApiKey    String   @default("prompter_live_sec_7f8a9b1c2d3e4f5a")
   requireApiKey   Boolean  @default(true)
-  appLogo         String   @default("/logo.png")
-  splashLogo      String   @default("/logo.png")
-  appIcon         String   @default("/icon.png")
-  favicon         String   @default("/favicon.ico")
+  appLogo         String   @default("/logo.png") @db.Text
+  splashLogo      String   @default("/logo.png") @db.Text
+  appIcon         String   @default("/icon.png") @db.Text
+  favicon         String   @default("/favicon.ico") @db.Text
   updatedAt       DateTime @updatedAt
 }
 
 model AppUrls {
   id                 String   @id @default("default")
-  privacyPolicy      String   @default("https://prompter.io/privacy")
-  termsOfService     String   @default("https://prompter.io/terms")
-  refundPolicy       String   @default("https://prompter.io/refund")
-  dataDeletionPolicy String   @default("https://prompter.io/data-deletion")
-  contactUs          String   @default("https://prompter.io/contact")
-  aboutUs            String   @default("https://prompter.io/about")
-  website            String   @default("https://prompter.io")
-  playStore          String   @default("https://play.google.com/store/apps/details?id=com.codemario.prompter")
-  facebook           String   @default("https://facebook.com/prompter")
-  instagram          String   @default("https://instagram.com/prompter")
-  youtube            String   @default("https://youtube.com/@prompter")
-  twitter            String   @default("https://x.com/prompter")
-  telegram           String   @default("https://t.me/prompter")
+  privacyPolicy      String   @default("https://prompter.io/privacy") @db.Text
+  termsOfService     String   @default("https://prompter.io/terms") @db.Text
+  refundPolicy       String   @default("https://prompter.io/refund") @db.Text
+  dataDeletionPolicy String   @default("https://prompter.io/data-deletion") @db.Text
+  contactUs          String   @default("https://prompter.io/contact") @db.Text
+  aboutUs            String   @default("https://prompter.io/about") @db.Text
+  website            String   @default("https://prompter.io") @db.Text
+  playStore          String   @default("https://play.google.com/store/apps/details?id=com.codemario.prompter") @db.Text
+  facebook           String   @default("https://facebook.com/prompter") @db.Text
+  instagram          String   @default("https://instagram.com/prompter") @db.Text
+  youtube            String   @default("https://youtube.com/@prompter") @db.Text
+  twitter            String   @default("https://x.com/prompter") @db.Text
+  telegram           String   @default("https://t.me/prompter") @db.Text
   updatedAt          DateTime @updatedAt
 }
 
@@ -229,9 +229,9 @@ model ActivityLog {
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   action    String
   entity    String
-  details   String?
+  details   String?  @db.Text
   ipAddress String?
-  userAgent String?
+  userAgent String?  @db.Text
   createdAt DateTime @default(now())
 }
 
@@ -240,8 +240,8 @@ model LoginLog {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   ipAddress String?
-  userAgent String?
-  status    String   @default("SUCCESS") // SUCCESS, FAILED
+  userAgent String?  @db.Text
+  status    String   @default("SUCCESS")
   createdAt DateTime @default(now())
 }
 
@@ -249,9 +249,9 @@ model AppUser {
   id           String   @id @default(cuid())
   name         String   @default("User")
   email        String   @unique
-  avatar       String?
+  avatar       String?  @db.Text
   authProvider String   @default("GOOGLE")
-  status       String   @default("ACTIVE") // ACTIVE, BLOCKED
+  status       String   @default("ACTIVE")
   isVip        Boolean  @default(false)
   appVersion   String?
   likesCount   Int      @default(0)
@@ -264,8 +264,8 @@ model PromptLike {
   id               String   @id @default(cuid())
   promptId         String
   prompt           Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
-  clientIdentifier String   // "user:${userId}" or "device:${deviceId}" or "ip:${ip}"
-  userId           String?  // Optional AppUser ID if signed in
+  clientIdentifier String
+  userId           String?
   createdAt        DateTime @default(now())
 
   @@unique([promptId, clientIdentifier])
@@ -278,8 +278,8 @@ model PromptActivity {
   id               String   @id @default(cuid())
   promptId         String
   prompt           Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
-  type             String   // "view", "like", "share", "copy"
-  clientIdentifier String?  // e.g. "user:123" or "device:abc" or "ip:1.2.3.4"
+  type             String
+  clientIdentifier String?
   createdAt        DateTime @default(now())
 
   @@index([promptId, type, createdAt])
@@ -307,11 +307,9 @@ model UploadedFile {
   id        String   @id @default(cuid())
   filename  String   @unique
   mimeType  String
-  data      String   // Base64-encoded image data
+  data      String   @db.LongText
   size      Int
   createdAt DateTime @default(now())
 
   @@index([filename])
 }
-
-
