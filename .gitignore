@@ -45,3 +45,4 @@ Thumbs.db
 # scratch / temp scripts
 scratch/
 *.sql
+!prompter_backup.sql
