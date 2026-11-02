@@ -28,7 +28,12 @@ if (!hasValidDbUrl) {
   // Provide dummy MySQL URL so prisma generate can compile client types during build
   process.env.DATABASE_URL = 'mysql://dummy:dummy@localhost:3306/dummy';
   execSync('npx prisma generate', { stdio: 'inherit', env: process.env });
-  execSync('npx next build', { stdio: 'inherit', env: process.env });
+  const fallbackEnv = {
+    ...process.env,
+    NEXT_CPU_NUM: process.env.NEXT_CPU_NUM || '1',
+    NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=2048',
+  };
+  execSync('npx next build', { stdio: 'inherit', env: fallbackEnv });
   process.exit(0);
 }
 
@@ -51,6 +56,11 @@ try {
   console.warn('⚠️ Warning: seed step skipped or already initialized.');
 }
 
-console.log('Building Next.js application...');
-execSync('npx next build', { stdio: 'inherit', env: process.env });
+console.log('Building Next.js application (single worker mode to respect Hostinger process limits)...');
+const buildEnv = {
+  ...process.env,
+  NEXT_CPU_NUM: process.env.NEXT_CPU_NUM || '1',
+  NODE_OPTIONS: process.env.NODE_OPTIONS || '--max-old-space-size=2048',
+};
+execSync('npx next build', { stdio: 'inherit', env: buildEnv });
 console.log('🎉 Production build completed successfully!');
