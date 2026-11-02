@@ -128,6 +128,12 @@ model Advertisement {
 
 model NotificationSetting {
   id               String   @id @default("default")
+  provider         String   @default("FCM") // "FCM" | "ONESIGNAL"
+  fcmProjectId     String   @default("")
+  fcmClientEmail   String   @default("")
+  fcmPrivateKey    String   @default("") // for Google OAuth2 / FCM HTTP v1 API
+  fcmServerKey     String   @default("") // legacy / web push fallback
+  fcmTopic         String   @default("all_users") // broadcast topic
   oneSignalAppId   String   @default("")
   oneSignalRestKey String   @default("")
   isEnabled        Boolean  @default(false)
@@ -135,19 +141,41 @@ model NotificationSetting {
 }
 
 model Notification {
-  id          String    @id @default(cuid())
-  title       String
-  message     String
-  image       String?
-  deepLink    String?
-  sendToAll   Boolean   @default(true)
-  scheduledAt DateTime?
-  sentAt      DateTime?
-  status      String    @default("SENT") // SENT, SCHEDULED, DRAFT, FAILED
-  createdById String
-  createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  title        String
+  message      String
+  image        String?
+  deepLink     String?
+  targetTopic  String?   @default("all_users")
+  sendToAll    Boolean   @default(true)
+  scheduledAt  DateTime?
+  sentAt       DateTime?
+  status       String    @default("SENT") // SENT, SCHEDULED, DRAFT, FAILED
+  successCount Int       @default(0)
+  failureCount Int       @default(0)
+  errorMessage String?
+  createdById  String
+  createdBy    User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model FcmDeviceToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  deviceId    String?  // Hardware UUID from client device
+  userId      String?  // Optional AppUser ID if authenticated
+  platform    String?  // "android", "ios", "flutter", "web"
+  appVersion  String?
+  isActive    Boolean  @default(true)
+  lastSeenAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([token])
+  @@index([deviceId])
+  @@index([userId])
+  @@index([platform])
 }
 
 model AppSettings {
