@@ -18,6 +18,7 @@ import {
   Share2,
   Sliders,
   Timer,
+  Clock,
   Layers,
   Flame,
   Trash2,
@@ -90,6 +91,8 @@ export default function SettingsPage() {
   const [notifTargetTopic, setNotifTargetTopic] = useState('all_users');
   const [sendingNotif, setSendingNotif] = useState(false);
   const [testingFcm, setTestingFcm] = useState(false);
+  const [processingScheduled, setProcessingScheduled] = useState(false);
+  const [sendingNowId, setSendingNowId] = useState<string | null>(null);
   const [fcmTestStatus, setFcmTestStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const [jsonPasteModalOpen, setJsonPasteModalOpen] = useState(false);
@@ -266,12 +269,75 @@ export default function SettingsPage() {
     }
   };
 
+  // Trigger immediate dispatch of a scheduled notification
+  const handleSendNow = async (id: string) => {
+    if (!confirm('Are you sure you want to dispatch this scheduled notification immediately now?')) return;
+    setSendingNowId(id);
+    try {
+      const res = await fetch(`/api/settings/notifications/${id}/send-now`, {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      success(data.message || 'Notification dispatched immediately');
+
+      // Refresh notification history & metrics
+      const resNotif = await fetch('/api/settings/notifications');
+      const dataNotif = await resNotif.json();
+      if (dataNotif.history) setNotificationsHistory(dataNotif.history);
+      if (dataNotif.metrics) setNotificationMetrics(dataNotif.metrics);
+    } catch (err: any) {
+      error(err.message || 'Failed to dispatch notification immediately');
+    } finally {
+      setSendingNowId(null);
+    }
+  };
+
+  // Manually check and dispatch due scheduled notifications
+  const handleProcessScheduled = async () => {
+    setProcessingScheduled(true);
+    try {
+      const res = await fetch('/api/settings/notifications/process-scheduled', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      success(data.message || 'Scheduled notifications check complete');
+
+      // Refresh notification history & metrics
+      const resNotif = await fetch('/api/settings/notifications');
+      const dataNotif = await resNotif.json();
+      if (dataNotif.history) setNotificationsHistory(dataNotif.history);
+      if (dataNotif.metrics) setNotificationMetrics(dataNotif.metrics);
+    } catch (err: any) {
+      error(err.message || 'Failed to process scheduled notifications');
+    } finally {
+      setProcessingScheduled(false);
+    }
+  };
+
   // Dispatch Broadcast Notification
   const handleSendNotification = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!notifTitle.trim() || !notifMessage.trim()) {
       error('Notification title and message are required');
       return;
+    }
+
+    let scheduledIso: string | null = null;
+    if (notifSchedule) {
+      const dateObj = new Date(notifSchedule);
+      if (isNaN(dateObj.getTime())) {
+        error('Invalid scheduled delivery date');
+        return;
+      }
+      if (dateObj.getTime() <= Date.now()) {
+        error('Scheduled delivery time must be set in the future');
+        return;
+      }
+      scheduledIso = dateObj.toISOString();
     }
 
     setSendingNotif(true);
@@ -286,7 +352,7 @@ export default function SettingsPage() {
           deepLink: notifDeepLink,
           targetTopic: notifTargetTopic || 'all_users',
           sendToAll: true,
-          scheduledAt: notifSchedule ? notifSchedule : null,
+          scheduledAt: scheduledIso,
         }),
       });
 
@@ -1191,15 +1257,35 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">
-                      Schedule Delivery (Leave empty for instant)
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-medium text-slate-500">
+                        Schedule Delivery (Leave empty for instant)
+                      </label>
+                      {notifSchedule && (
+                        <button
+                          type="button"
+                          onClick={() => setNotifSchedule('')}
+                          className="text-[10px] text-rose-500 hover:text-rose-600 font-semibold"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
                     <input
                       type="datetime-local"
                       value={notifSchedule}
                       onChange={(e) => setNotifSchedule(e.target.value)}
                       className="w-full px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
                     />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {notifSchedule ? (
+                        <span className="text-amber-600 dark:text-amber-400 font-medium">
+                          Will send automatically on {new Date(notifSchedule).toLocaleString()}
+                        </span>
+                      ) : (
+                        `Local timezone: ${typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'Local'}`
+                      )}
+                    </p>
                   </div>
                 </div>
 
@@ -1222,9 +1308,21 @@ export default function SettingsPage() {
                     </h3>
                     <p className="text-xs text-slate-500">Audit trail of dispatched & scheduled alerts</p>
                   </div>
-                  <span className="text-xs font-semibold text-slate-400">
-                    {notificationsHistory.length} recorded
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleProcessScheduled}
+                      disabled={processingScheduled}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-[11px] font-semibold transition-colors disabled:opacity-50"
+                      title="Trigger delivery check for any scheduled alerts that are now due"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${processingScheduled ? 'animate-spin' : ''}`} />
+                      Check Due
+                    </button>
+                    <span className="text-xs font-semibold text-slate-400">
+                      {notificationsHistory.length} recorded
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto max-h-[380px] space-y-3 pr-1">
@@ -1243,6 +1341,22 @@ export default function SettingsPage() {
                             {n.title}
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
+                            {n.status === 'SCHEDULED' && (
+                              <button
+                                type="button"
+                                onClick={() => handleSendNow(n.id)}
+                                disabled={sendingNowId === n.id}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors disabled:opacity-50 shadow-sm"
+                                title="Send this scheduled notification immediately"
+                              >
+                                {sendingNowId === n.id ? (
+                                  <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                ) : (
+                                  <Send className="w-2.5 h-2.5" />
+                                )}
+                                Send Now
+                              </button>
+                            )}
                             <span
                               className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                 n.status === 'SENT'
@@ -1278,7 +1392,15 @@ export default function SettingsPage() {
                               </span>
                             )}
                           </div>
-                          <span>{new Date(n.sentAt || n.createdAt).toLocaleDateString()}</span>
+                          <div className="flex items-center gap-2">
+                            {n.status === 'SCHEDULED' && n.scheduledAt ? (
+                              <span className="text-amber-600 dark:text-amber-400 font-medium">
+                                ⏰ Due: {new Date(n.scheduledAt).toLocaleString()}
+                              </span>
+                            ) : (
+                              <span>{new Date(n.sentAt || n.createdAt).toLocaleString()}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))

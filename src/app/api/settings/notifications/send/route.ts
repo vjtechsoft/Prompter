@@ -24,7 +24,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Title and message are required' }, { status: 400 });
     }
 
-    const isScheduled = scheduledAt && new Date(scheduledAt) > new Date();
+    let isScheduled = false;
+    let scheduledDate: Date | null = null;
+
+    if (scheduledAt) {
+      scheduledDate = new Date(scheduledAt);
+      if (isNaN(scheduledDate.getTime())) {
+        return NextResponse.json({ error: 'Invalid scheduled date format' }, { status: 400 });
+      }
+      if (scheduledDate.getTime() <= Date.now()) {
+        return NextResponse.json({ error: 'Scheduled delivery time must be set in the future' }, { status: 400 });
+      }
+      isScheduled = true;
+    }
 
     // Fetch active notification configuration
     const config = await prisma.notificationSetting.findUnique({
@@ -81,7 +93,7 @@ export async function POST(req: NextRequest) {
         deepLink: deepLink ? deepLink.trim() : null,
         targetTopic: effectiveTopic,
         sendToAll: sendToAll !== undefined ? Boolean(sendToAll) : true,
-        scheduledAt: isScheduled ? new Date(scheduledAt) : null,
+        scheduledAt: isScheduled ? scheduledDate : null,
         sentAt: isScheduled ? null : new Date(),
         status: notificationStatus,
         successCount: fcmResult.successCount,
@@ -107,7 +119,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: isScheduled
-        ? 'Notification successfully scheduled'
+        ? `Notification successfully scheduled for ${scheduledDate?.toLocaleString()}`
         : fcmResult.success
         ? `Notification dispatched successfully to topic "${effectiveTopic}" via Firebase Cloud Messaging`
         : `Notification logged in dashboard (FCM dispatch notice: ${fcmResult.error})`,

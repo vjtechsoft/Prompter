@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { logActivity } from '@/lib/audit';
 import { formatPrivateKey } from '@/lib/fcm';
+import { processScheduledNotifications } from '@/lib/notification-scheduler';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,11 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    // Opportunistically dispatch any scheduled notifications that are now due
+    await processScheduledNotifications().catch((e) =>
+      console.error('Opportunistic scheduled notifications processing error:', e)
+    );
+
     // Fetch broadcast history
     const history = await prisma.notification.findMany({
       orderBy: { createdAt: 'desc' },
@@ -39,12 +45,13 @@ export async function GET(req: NextRequest) {
     });
 
     // Device token metrics
-    const [totalDevices, androidDevices, iosDevices, otherDevices, totalSent] = await Promise.all([
+    const [totalDevices, androidDevices, iosDevices, otherDevices, totalSent, scheduledCount] = await Promise.all([
       prisma.fcmDeviceToken.count({ where: { isActive: true } }),
       prisma.fcmDeviceToken.count({ where: { isActive: true, platform: 'android' } }),
       prisma.fcmDeviceToken.count({ where: { isActive: true, platform: 'ios' } }),
       prisma.fcmDeviceToken.count({ where: { isActive: true, platform: { notIn: ['android', 'ios'] } } }),
       prisma.notification.count({ where: { status: 'SENT' } }),
+      prisma.notification.count({ where: { status: 'SCHEDULED' } }),
     ]);
 
     return NextResponse.json({
@@ -56,6 +63,7 @@ export async function GET(req: NextRequest) {
         iosDevices,
         otherDevices,
         totalSent,
+        scheduledCount,
       },
     });
   } catch (error) {

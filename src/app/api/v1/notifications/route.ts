@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { validateClientApiKey } from '@/lib/client-auth';
+import { processScheduledNotifications } from '@/lib/notification-scheduler';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,11 @@ export async function GET(req: NextRequest) {
     if (!auth.valid) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
     }
+
+    // Opportunistically dispatch any scheduled notifications that have become due
+    await processScheduledNotifications().catch((e) =>
+      console.error('Client feed scheduled notifications dispatch error:', e)
+    );
 
     const { searchParams } = new URL(req.url);
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
