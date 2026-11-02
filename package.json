@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "node scripts/vercel-build.js",
     "start": "next start",
+    "start:server": "node server.js",
     "lint": "next lint",
     "postinstall": "node scripts/postinstall.js",
     "prisma:generate": "prisma generate",
