@@ -216,7 +216,8 @@ export async function GET(req: NextRequest) {
         trendingScore: calculateTrendingScore(p.views, p.likes, p.shares),
         popularScore: calculatePopularScore(p.views, p.likes, p.shares),
         deepLink: `prompter://prompt/${p.slug}`,
-        shareUrl: `${origin}/prompt/${p.slug}`,
+        shortUrl: `${origin}/p/${p.slug}`,
+        shareUrl: `${origin}/p/${p.slug}`,
         createdAt: p.createdAt,
       };
     });

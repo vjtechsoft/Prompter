@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { prompt, settings, urls } = data;
   const appName = settings?.appName || 'Prompter';
-  const packageName = settings?.packageName || 'com.prompter.studio';
+  const packageName = settings?.packageName || 'com.codemario.prompter';
   const title = `${prompt.title} - ${appName}`;
   const description =
     prompt.prompt.length > 160 ? prompt.prompt.substring(0, 157) + '...' : prompt.prompt;
@@ -97,7 +97,7 @@ export default async function PromptDeepLinkPage({ params, searchParams }: Props
 
   const { prompt, settings, urls } = data;
   const appName = settings?.appName || 'Prompter';
-  const packageName = settings?.packageName || 'com.prompter.studio';
+  const packageName = settings?.packageName || 'com.codemario.prompter';
   const playStoreUrl =
     urls?.playStore || `https://play.google.com/store/apps/details?id=${packageName}`;
   const appLogo = settings?.appLogo || '/logo.png';

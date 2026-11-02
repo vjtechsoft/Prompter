@@ -104,12 +104,13 @@ Prompter includes built-in mobile deep linking URIs and smart web share URLs on 
 
 ### 3.2 How Web Deep-Linking & Play Store Fallback Works
 
-When a user in your client app taps **"Share Prompt"**, share the prompt's `shareUrl` (e.g. `https://your-domain.com/prompt/cyberpunk-portrait`):
+When a user in your client app taps **"Share Prompt"**, share the prompt's `shortUrl` or `shareUrl` (e.g. `https://your-domain.com/p/cyberpunk-portrait`):
 
-1. **Rich Social Preview**: When shared on WhatsApp, Telegram, Twitter, Facebook, or iMessage, the link displays rich Open Graph preview cards with the prompt's featured image, title, and category.
-2. **If App Is Installed**: Android/iOS automatically intercepts the link (via Android App Links or custom intent `prompter://prompt/{slug}`) and opens the specific prompt immediately inside the native app.
-3. **If App Is NOT Installed**: The mobile browser automatically attempts app detection and gracefully redirects the user directly to the Google Play Store listing (`https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME`).
-4. **Desktop / Web Fallback**: If opened on a computer, users see an interactive prompt landing page with 1-click "Copy Prompt", prompt tags, category badge, and a "Get it on Google Play" download button.
+1. **Custom Short URL**: Compact, clean sharing links (`/p/{slug}`) that fit neatly in SMS, WhatsApp, social media, and chat captions.
+2. **Rich Social Preview**: When shared on WhatsApp, Telegram, Twitter, Facebook, or iMessage, the link displays rich Open Graph preview cards with the prompt's featured image, title, and category.
+3. **If App Is Installed**: Android automatically intercepts the link (via Android App Links or custom intent `prompter://prompt/{slug}`) and opens the specific prompt immediately inside the `com.codemario.prompter` app.
+4. **If App Is NOT Installed**: The mobile browser automatically detects that the app is missing and immediately redirects the user to the Google Play Store listing (`https://play.google.com/store/apps/details?id=com.codemario.prompter`).
+5. **Desktop / Web Fallback**: If opened on a computer, users see an interactive prompt landing page with 1-click "Copy Prompt", prompt tags, category badge, and a "Get it on Google Play" download button.
 
 ---
 
@@ -213,7 +214,7 @@ Retrieves app boot metadata, versioning, contact info, and maintenance mode stat
   "data": {
     "appName": "Prompter",
     "developerName": "PromptForge Studio",
-    "packageName": "com.prompter.app",
+    "packageName": "com.codemario.prompter",
     "versionName": "1.0.0",
     "versionCode": "100",
     "maintenanceMode": false,

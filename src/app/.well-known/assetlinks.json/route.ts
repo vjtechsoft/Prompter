@@ -9,7 +9,7 @@ export async function GET() {
       where: { id: 'default' },
     });
 
-    const packageName = settings?.packageName || 'com.prompter.studio';
+    const packageName = settings?.packageName || 'com.codemario.prompter';
 
     const assetLinks = [
       {

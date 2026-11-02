@@ -66,7 +66,7 @@ export async function PUT(req: NextRequest) {
       update: {
         appName: appName || 'Prompter Admin',
         developerName: developerName || 'Prompter Devs',
-        packageName: packageName || 'com.prompter.admin',
+        packageName: packageName || 'com.codemario.prompter',
         versionName: versionName || '1.0.0',
         versionCode: versionCode || '100',
         supportEmail: supportEmail || 'support@prompter.io',
@@ -87,7 +87,7 @@ export async function PUT(req: NextRequest) {
         id: 'default',
         appName: appName || 'Prompter Admin',
         developerName: developerName || 'Prompter Devs',
-        packageName: packageName || 'com.prompter.admin',
+        packageName: packageName || 'com.codemario.prompter',
         versionName: versionName || '1.0.0',
         versionCode: versionCode || '100',
         supportEmail: supportEmail || 'support@prompter.io',

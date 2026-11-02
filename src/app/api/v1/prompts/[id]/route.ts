@@ -90,8 +90,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     const origin = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const urls = await prisma.appUrls.findUnique({ where: { id: 'default' } });
-    const playStoreUrl = urls?.playStore || 'https://play.google.com/store/apps/details?id=com.prompter.studio';
+    const [urls, settings] = await Promise.all([
+      prisma.appUrls.findUnique({ where: { id: 'default' } }),
+      prisma.appSettings.findUnique({ where: { id: 'default' } }),
+    ]);
+    const packageName = settings?.packageName || 'com.codemario.prompter';
+    const playStoreUrl = urls?.playStore || `https://play.google.com/store/apps/details?id=${packageName}`;
 
     return NextResponse.json({
       success: true,
@@ -102,8 +106,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         trendingScore: calculateTrendingScore(prompt.views, prompt.likes, prompt.shares),
         popularScore: calculatePopularScore(prompt.views, prompt.likes, prompt.shares),
         deepLink: `prompter://prompt/${prompt.slug}`,
-        shareUrl: `${origin}/prompt/${prompt.slug}`,
-        shareText: `Check out "${prompt.title}" on Prompter:\n${origin}/prompt/${prompt.slug}`,
+        shortUrl: `${origin}/p/${prompt.slug}`,
+        shareUrl: `${origin}/p/${prompt.slug}`,
+        shareText: `Check out "${prompt.title}" on Prompter:\n${origin}/p/${prompt.slug}`,
+        packageName,
         playStoreUrl,
       },
     });
