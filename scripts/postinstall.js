@@ -1,21 +1,20 @@
 const { execSync } = require('child_process');
 
-// Automatically resolve Vercel Postgres variables if DATABASE_URL is not directly set
+// Automatically resolve environment variables if DATABASE_URL is not directly set
 if (!process.env.DATABASE_URL) {
-  if (process.env.POSTGRES_PRISMA_URL) {
-    process.env.DATABASE_URL = process.env.POSTGRES_PRISMA_URL;
-  } else if (process.env.POSTGRES_URL) {
-    process.env.DATABASE_URL = process.env.POSTGRES_URL;
+  if (process.env.MYSQL_URL) {
+    process.env.DATABASE_URL = process.env.MYSQL_URL;
+  } else if (process.env.PLANETSCALE_DATABASE_URL) {
+    process.env.DATABASE_URL = process.env.PLANETSCALE_DATABASE_URL;
   }
 }
 
-// Fallback dummy PostgreSQL URL so prisma generate always succeeds during npm install / postinstall
+// Fallback dummy MySQL URL so prisma generate always succeeds during npm install / postinstall
 if (
   !process.env.DATABASE_URL ||
-  (!process.env.DATABASE_URL.startsWith('postgresql://') &&
-    !process.env.DATABASE_URL.startsWith('postgres://'))
+  !process.env.DATABASE_URL.startsWith('mysql://')
 ) {
-  process.env.DATABASE_URL = 'postgresql://dummy:dummy@localhost:5432/dummy?schema=public';
+  process.env.DATABASE_URL = 'mysql://dummy:dummy@localhost:3306/dummy';
 }
 
 try {
