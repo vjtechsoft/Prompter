@@ -89,6 +89,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       isLiked = Boolean(existingLike);
     }
 
+    const origin = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const urls = await prisma.appUrls.findUnique({ where: { id: 'default' } });
+    const playStoreUrl = urls?.playStore || 'https://play.google.com/store/apps/details?id=com.prompter.studio';
+
     return NextResponse.json({
       success: true,
       data: {
@@ -98,6 +102,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         trendingScore: calculateTrendingScore(prompt.views, prompt.likes, prompt.shares),
         popularScore: calculatePopularScore(prompt.views, prompt.likes, prompt.shares),
         deepLink: `prompter://prompt/${prompt.slug}`,
+        shareUrl: `${origin}/prompt/${prompt.slug}`,
+        shareText: `Check out "${prompt.title}" on Prompter:\n${origin}/prompt/${prompt.slug}`,
+        playStoreUrl,
       },
     });
   } catch (error) {

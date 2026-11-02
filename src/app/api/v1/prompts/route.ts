@@ -188,6 +188,8 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const origin = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
     const formatted = prompts.map((p) => {
       let parsedTags: string[] = [];
       try {
@@ -214,6 +216,7 @@ export async function GET(req: NextRequest) {
         trendingScore: calculateTrendingScore(p.views, p.likes, p.shares),
         popularScore: calculatePopularScore(p.views, p.likes, p.shares),
         deepLink: `prompter://prompt/${p.slug}`,
+        shareUrl: `${origin}/prompt/${p.slug}`,
         createdAt: p.createdAt,
       };
     });

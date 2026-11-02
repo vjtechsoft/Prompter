@@ -88,15 +88,111 @@ Accept: application/json
 
 ---
 
-## 3. Deep Linking Schema
+## 3. Deep Linking & Smart Web Share Schema
 
-Prompter includes built-in mobile deep linking URIs on all prompts and categories to facilitate push notifications, QR codes, and in-app navigation:
+Prompter includes built-in mobile deep linking URIs and smart web share URLs on all prompts to facilitate push notifications, WhatsApp/SMS sharing, QR codes, and seamless app installs:
 
-| Target | URI Pattern | Example |
-|---|---|---|
-| **Prompt Screen** | `prompter://prompt/{slug}` | `prompter://prompt/full-stack-next-js-14-clean-architecture` |
-| **Category Screen** | `prompter://category/{slug}` | `prompter://category/coding-architecture` |
-| **Subcategory Screen** | `prompter://category/{catSlug}/sub/{subSlug}` | `prompter://category/coding-architecture/sub/nextjs` |
+### 3.1 Deep Link Schemes & URLs
+
+| Target | App URI Pattern | Web Share URL | Behavior |
+|---|---|---|---|
+| **Prompt Screen** | `prompter://prompt/{slug}` | `https://your-domain.com/prompt/{slug}` *(or `/p/{slug}`)* | Opens specific prompt in app. **If app is not installed, automatically redirects user to Google Play Store.** |
+| **Category Screen** | `prompter://category/{slug}` | `prompter://category/{slug}` | Navigates directly to category view in app. |
+| **Subcategory Screen** | `prompter://category/{catSlug}/sub/{subSlug}` | `prompter://category/{catSlug}/sub/{subSlug}` | Navigates directly to subcategory view in app. |
+
+---
+
+### 3.2 How Web Deep-Linking & Play Store Fallback Works
+
+When a user in your client app taps **"Share Prompt"**, share the prompt's `shareUrl` (e.g. `https://your-domain.com/prompt/cyberpunk-portrait`):
+
+1. **Rich Social Preview**: When shared on WhatsApp, Telegram, Twitter, Facebook, or iMessage, the link displays rich Open Graph preview cards with the prompt's featured image, title, and category.
+2. **If App Is Installed**: Android/iOS automatically intercepts the link (via Android App Links or custom intent `prompter://prompt/{slug}`) and opens the specific prompt immediately inside the native app.
+3. **If App Is NOT Installed**: The mobile browser automatically attempts app detection and gracefully redirects the user directly to the Google Play Store listing (`https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME`).
+4. **Desktop / Web Fallback**: If opened on a computer, users see an interactive prompt landing page with 1-click "Copy Prompt", prompt tags, category badge, and a "Get it on Google Play" download button.
+
+---
+
+### 3.3 Android App Links & Intent Filter Setup (`AndroidManifest.xml`)
+
+Add the following intent filters inside your `<activity>` in `android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<activity
+    android:name=".MainActivity"
+    android:launchMode="singleTask"
+    ...>
+
+    <!-- 1. Custom URL Scheme (prompter://prompt/{slug}) -->
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data
+            android:scheme="prompter"
+            android:host="prompt" />
+    </intent-filter>
+
+    <!-- 2. Universal / App Links (https://your-domain.com/prompt/{slug}) -->
+    <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data
+            android:scheme="https"
+            android:host="your-domain.com"
+            android:pathPrefix="/prompt" />
+        <data
+            android:scheme="https"
+            android:host="your-domain.com"
+            android:pathPrefix="/p" />
+    </intent-filter>
+
+</activity>
+```
+
+---
+
+### 3.4 Flutter Deep Link Handling Code Example
+
+```dart
+import 'package:app_links/app_links.dart';
+import 'package:share_plus/share_plus.dart';
+
+class DeepLinkService {
+  static final _appLinks = AppLinks();
+
+  // 1. Initialize Deep Link Listener
+  static void init(Function(String slug) onPromptOpened) {
+    // Handle link when app is started from cold state
+    _appLinks.getInitialAppLink().then((uri) {
+      if (uri != null) _handleUri(uri, onPromptOpened);
+    });
+
+    // Handle incoming link while app is in background/foreground
+    _appLinks.uriLinkStream.listen((uri) {
+      _handleUri(uri, onPromptOpened);
+    });
+  }
+
+  static void _handleUri(Uri uri, Function(String slug) onPromptOpened) {
+    // Matches: prompter://prompt/{slug} OR https://your-domain.com/prompt/{slug}
+    if ((uri.scheme == 'prompter' && uri.host == 'prompt') ||
+        (uri.pathSegments.isNotEmpty && (uri.pathSegments.first == 'prompt' || uri.pathSegments.first == 'p'))) {
+      final slug = uri.pathSegments.last;
+      onPromptOpened(slug);
+    }
+  }
+
+  // 2. Share Prompt Function
+  static void sharePrompt({required String title, required String shareUrl}) {
+    Share.share(
+      'Check out this AI prompt "$title" on Prompter!\n$shareUrl',
+      subject: title,
+    );
+  }
+}
+```
 
 ---
 

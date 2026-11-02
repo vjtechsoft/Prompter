@@ -178,9 +178,9 @@ export default function ClientApisPage() {
       method: 'GET',
       path: '/api/v1/prompts/:id',
       category: 'Prompts',
-      summary: 'Get Prompt Details by ID or Slug',
+      summary: 'Get Prompt Details by ID or Slug (with Smart Deep Links)',
       description:
-        'Fetches complete details for a single published prompt. Supports querying either by database ID or human-readable URL slug.',
+        'Fetches complete details for a single published prompt by database ID or URL slug. Includes both raw custom app scheme (prompter://prompt/{slug}) and web shareable URL (https://domain/prompt/{slug}) which auto-opens the app or redirects to Google Play Store if not installed.',
       defaultTestPath: '/api/v1/prompts/full-stack-next-js-14-clean-architecture-prompter',
       params: [
         { name: 'id', type: 'string (path)', required: true, description: 'Prompt ID or URL slug (e.g. "full-stack-next-js-14-clean-architecture-prompter")' },
