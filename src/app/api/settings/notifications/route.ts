@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/auth';
 import { logActivity } from '@/lib/audit';
+import { formatPrivateKey } from '@/lib/fcm';
 
 export const dynamic = 'force-dynamic';
 
@@ -97,6 +98,18 @@ export async function PUT(req: NextRequest) {
         if (parsed.private_key) fcmPrivateKey = parsed.private_key;
       } catch (err) {
         return NextResponse.json({ error: 'Invalid Service Account JSON format' }, { status: 400 });
+      }
+    }
+
+    // Format & validate RSA Private Key if provided
+    if (fcmPrivateKey && typeof fcmPrivateKey === 'string' && fcmPrivateKey.trim()) {
+      try {
+        fcmPrivateKey = formatPrivateKey(fcmPrivateKey);
+      } catch (keyErr: any) {
+        return NextResponse.json(
+          { error: keyErr.message || 'Invalid Firebase Service Account RSA Private Key' },
+          { status: 400 }
+        );
       }
     }
 

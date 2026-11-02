@@ -23,6 +23,65 @@ let cachedAccessToken: string | null = null;
 let tokenExpiresAt = 0;
 
 /**
+ * Normalizes and formats an RSA Private Key string into valid RFC-standard PEM structure.
+ * Robustly handles escaped newlines (\n), Windows CRLF (\r\n), surrounding quotes (" or '),
+ * and Base64 body chunking for OpenSSL 3.0 compatibility.
+ */
+export function formatPrivateKey(rawKey: string): string {
+  if (!rawKey || typeof rawKey !== 'string') {
+    throw new Error('Private key must be a non-empty string');
+  }
+
+  let key = rawKey.trim();
+
+  // Strip surrounding quotes if user copied directly with quotes from JSON
+  if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+    key = key.slice(1, -1);
+  }
+
+  // Replace literal escaped newlines (both \\n and \n)
+  key = key.replace(/\\r\\n/g, '\n').replace(/\\r/g, '\n').replace(/\\n/g, '\n');
+  key = key.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // Detect begin and end markers
+  const beginMatch = key.match(/-----BEGIN [A-Z0-9 ]+-----/);
+  const endMatch = key.match(/-----END [A-Z0-9 ]+-----/);
+
+  const header = beginMatch ? beginMatch[0] : '-----BEGIN PRIVATE KEY-----';
+  const footer = endMatch ? endMatch[0] : '-----END PRIVATE KEY-----';
+
+  let body = key;
+  if (beginMatch && endMatch) {
+    const beginIdx = key.indexOf(header) + header.length;
+    const endIdx = key.indexOf(footer);
+    body = key.substring(beginIdx, endIdx);
+  } else if (beginMatch) {
+    body = key.substring(key.indexOf(header) + header.length);
+  } else if (endMatch) {
+    body = key.substring(0, key.indexOf(footer));
+  }
+
+  // Strip all whitespace, newlines, and carriage returns from the base64 body
+  const base64Body = body.replace(/[\s\r\n]+/g, '');
+  if (!base64Body) {
+    throw new Error('Firebase RSA private key body is empty or corrupted');
+  }
+
+  // Wrap base64 body in standard 64-character PEM lines
+  const chunkedBody = base64Body.match(/.{1,64}/g)?.join('\n') || '';
+  const formatted = `${header}\n${chunkedBody}\n${footer}\n`;
+
+  // Pre-validate that Node.js crypto engine can parse this private key
+  try {
+    crypto.createPrivateKey(formatted);
+  } catch (err: any) {
+    throw new Error(`Invalid Firebase RSA Private Key: ${err.message}. Please verify the private_key from your Firebase service-account.json.`);
+  }
+
+  return formatted;
+}
+
+/**
  * Generate Google OAuth2 Bearer Token using Service Account credentials.
  * Works natively in Node.js with zero external SDKs.
  */
@@ -38,11 +97,8 @@ export async function getGoogleAccessToken(clientEmail: string, rawPrivateKey: s
     throw new Error('Missing client_email or private_key in Firebase Service Account credentials');
   }
 
-  // Ensure newlines are properly formatted
-  let privateKey = rawPrivateKey.trim();
-  if (!privateKey.includes('\n') && privateKey.includes('\\n')) {
-    privateKey = privateKey.replace(/\\n/g, '\n');
-  }
+  // Ensure private key is properly formatted into valid RFC PEM
+  const privateKey = formatPrivateKey(rawPrivateKey);
 
   // Create JWT Header & Claim Set
   const header = {
