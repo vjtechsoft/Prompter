@@ -1,5 +1,11 @@
 const { execSync } = require('child_process');
 
+// Cap threadpools to prevent Hostinger / CloudLinux OS error 11 (thread exhaustion)
+process.env.TOKIO_WORKER_THREADS = process.env.TOKIO_WORKER_THREADS || '1';
+process.env.UV_THREADPOOL_SIZE = process.env.UV_THREADPOOL_SIZE || '1';
+process.env.NEXT_CPU_NUM = process.env.NEXT_CPU_NUM || '1';
+process.env.NODE_OPTIONS = process.env.NODE_OPTIONS || '--max-old-space-size=2048';
+
 console.log('🚀 Running Prompter production build preparation (MySQL)...');
 
 // Resolve DATABASE_URL from environment variables if not directly set

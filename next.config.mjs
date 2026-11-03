@@ -12,7 +12,13 @@ const nextConfig = {
   },
   experimental: {
     cpus: 1,
-    workerThreads: false,
+  },
+  eslint: {
+    // Ignore ESLint during production build to prevent memory/thread bloat from legacy linters on shared hosting
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
   },
 };
 
