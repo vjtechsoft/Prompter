@@ -1,211 +1,136 @@
 # 📱 Prompter Client Application API Documentation
 
-> **Version:** `1.0.0`  
+> **Version:** `2.0.0` (Updated)  
 > **Protocol:** REST / JSON  
-> **Default Base URL:** `http://localhost:3000` (Development) or `https://your-domain.com` (Production)  
-> **API Version Prefix:** `/api/v1`
+> **Base URL:** `http://localhost:3000` (Development) or `https://yourdomain.com` (Production)  
+> **API Version Prefix:** `/api/v1`  
+> **Android App Package Name:** `com.codemario.prompter`  
+> **Deep Link Scheme:** `prompter://`  
+> **Custom Short URL:** `https://yourdomain.com/p/{slug}`  
 
-Welcome to the **Prompter Client API** documentation. These endpoints are designed specifically for consumer client applications (iOS, Android, Flutter, React Native, and Web clients) to consume prompt libraries, category taxonomies, monetization configs, application branding, and push notification links without administrative authentication.
+Welcome to the **Prompter Client API** documentation. These endpoints are designed specifically for consumer client applications (**Android / Kotlin**, **Flutter**, **React Native**, **iOS / Swift**, and **Web**) to consume prompt libraries, category taxonomies, monetization configs, notifications, deep links, and user profiles.
 
 ---
 
 ## 📑 Table of Contents
+
 1. [Authentication & Security](#1-authentication--security)
-2. [Global Standards & Error Handling](#2-global-standards--error-handling)
-3. [Deep Linking Schema](#3-deep-linking-schema)
-4. [Endpoints Reference](#4-endpoints-reference)
-   - [4.1 App Configuration (`GET /api/v1/app-config`)](#41-get-apiv1app-config)
-   - [4.2 Legal & Social URLs (`GET /api/v1/urls`)](#42-get-apiv1urls)
-   - [4.3 Ad Network Configuration (`GET /api/v1/ads`)](#43-get-apiv1ads)
-   - [4.4 Category Taxonomy (`GET /api/v1/categories`)](#44-get-apiv1categories)
-   - [4.5 Prompts Feed & Search (`GET /api/v1/prompts`)](#45-get-apiv1prompts)
-   - [4.6 Prompt Detail (`GET /api/v1/prompts/:id`)](#46-get-apiv1promptsid)
-   - [4.7 Register User Engagement (`POST /api/v1/prompts/:id/action`)](#47-post-apiv1promptsidaction)
-   - [4.8 Dynamic Trending Prompts (`GET /api/v1/trending`)](#48-get-apiv1trending)
-   - [4.9 User Profile & Google Sync (`POST /api/v1/users/sync`)](#49-post-apiv1userssync)
-5. [Special Implementations](#5-special-implementations)
-   - [Deterministic Non-Repeating Random Sorting](#deterministic-non-repeating-random-sorting)
-   - [Ad Network Runtime Initialization](#ad-network-runtime-initialization)
-   - [Maintenance Mode Handling](#maintenance-mode-handling)
+2. [Global Standards & Response Structure](#2-global-standards--response-structure)
+3. [Deep Linking & Custom Short URLs](#3-deep-linking--custom-short-urls)
+   - [Smart Redirect URLs (`/p/{slug}`)](#smart-redirect-urls-pslug)
+   - [Android App Links (`/.well-known/assetlinks.json`)](#android-app-links-well-knownassetlinksjson)
+4. [API Endpoints Reference](#4-api-endpoints-reference)
+   - [4.1 App Configuration (`GET /api/v1/app-config`)](#41-app-configuration)
+   - [4.2 Legal, Social & Store URLs (`GET /api/v1/urls`)](#42-legal-social--store-urls)
+   - [4.3 Ad Network Configuration (`GET /api/v1/ads`)](#43-ad-network-configuration)
+   - [4.4 Category Taxonomy (`GET /api/v1/categories`)](#44-category-taxonomy)
+   - [4.5 Subcategories (`GET /api/v1/subcategories`)](#45-subcategories)
+   - [4.6 Prompts Feed & Search (`GET /api/v1/prompts`)](#46-prompts-feed--search)
+   - [4.7 Prompt Detail (`GET /api/v1/prompts/{id}`)](#47-prompt-detail)
+   - [4.8 User Engagement Action (`POST /api/v1/prompts/{id}/action`)](#48-user-engagement-action)
+   - [4.9 Dynamic Trending Prompts (`GET /api/v1/trending`)](#49-dynamic-trending-prompts)
+   - [4.10 Push Notification Feed (`GET /api/v1/notifications`)](#410-push-notification-feed)
+   - [4.11 Register FCM Device Token (`POST /api/v1/notifications/token`)](#411-register-fcm-device-token)
+   - [4.12 User Profile Sync (`POST /api/v1/users/sync`)](#412-user-profile-sync)
+   - [4.13 Uploaded Files & Images (`GET /uploads/{filename}`)](#413-uploaded-files--images)
+5. [Client Integration Guide](#5-client-integration-guide)
+   - [Android Manifest Deep Linking Config](#android-manifest-deep-linking-config)
+   - [Deterministic Non-Repeating Random Pagination](#deterministic-non-repeating-random-pagination)
+   - [User & Device Identification Strategy](#user--device-identification-strategy)
 6. [Code Samples](#6-code-samples)
+   - [Kotlin (Android Retrofit/OkHttp)](#kotlin-android)
+   - [Flutter (Dart / Dio)](#flutter-dart)
    - [cURL](#curl)
-   - [TypeScript / JavaScript](#typescript--javascript)
-   - [Flutter / Dart](#flutter--dart)
-   - [Android (Kotlin)](#android-kotlin)
-   - [iOS (Swift)](#ios-swift)
 
 ---
 
 ## 1. Authentication & Security
 
-Client API endpoints are secured via a static **Client API Key** passed in the HTTP request headers.
+All `/api/v1/*` endpoints are secured via a static **Client API Key**.
 
-### Required Header
+### Required HTTP Headers
 ```http
 x-api-key: YOUR_CLIENT_API_KEY
-```
-
-> **Default Development Key:** `prompter_live_sec_7f8a9b1c2d3e4f5a`  
-> *(Super Admins can view, regenerate, or toggle API Key enforcement on or off inside the Admin Panel under **Client API Endpoints** or **Settings**).*
-
-If API key enforcement is disabled by the administrator in the Admin Panel, requests will succeed even without the header. When enabled, requests without a valid key receive HTTP `401 Unauthorized`.
-
----
-
-## 2. Global Standards & Error Handling
-
-### Headers
-All requests containing body payloads must include:
-```http
 Content-Type: application/json
 Accept: application/json
 ```
 
-### Standard Success Response
+> **Default Development Key:** `prompter_live_sec_7f8a9b1c2d3e4f5a`  
+> *(Super Admins can view, regenerate, or toggle API Key enforcement on/off inside the Admin Panel under **Settings** → **Client APIs**).*
+
+### Optional Identification Headers (Recommended for personalization & like states)
+| Header | Description | Example |
+|---|---|---|
+| `x-device-id` | Unique hardware/installation ID of device | `uuid-android-9876-5432-10` |
+| `x-user-id` | Signed-in user email or ID | `user@example.com` |
+
+---
+
+## 2. Global Standards & Response Structure
+
+### Success Response (`200 OK`)
 ```json
 {
   "success": true,
-  "data": { ... }
+  "data": { ... },
+  "meta": { ... }
 }
 ```
 
-### Standard Error Response
+### Error Response (`4xx / 5xx`)
 ```json
 {
   "success": false,
-  "error": "Descriptive error message explaining the issue"
+  "error": "Descriptive error message explaining the failure."
 }
 ```
 
-### HTTP Status Codes
-| Status Code | Description | Meaning |
+### Standard HTTP Status Codes
+| Code | Meaning | When Returned |
 |---|---|---|
-| `200 OK` | Success | The request succeeded and data is returned. |
-| `400 Bad Request` | Validation Error | Missing required query/body parameters or invalid input. |
-| `401 Unauthorized` | Authentication Failed | Missing or invalid `x-api-key` header. |
-| `404 Not Found` | Resource Missing | Prompt or Category ID/Slug does not exist. |
-| `500 Internal Error`| Server Error | Unexpected server or database exception. |
+| `200` | OK | Request succeeded. |
+| `400` | Bad Request | Missing required parameters or invalid body payload. |
+| `401` | Unauthorized | Missing or invalid `x-api-key` header. |
+| `403` | Forbidden | User account is blocked/suspended. |
+| `404` | Not Found | Requested prompt, category, or resource does not exist. |
+| `500` | Server Error | Internal server or database error. |
 
 ---
 
-## 3. Deep Linking & Smart Web Share Schema
+## 3. Deep Linking & Custom Short URLs
 
-Prompter includes built-in mobile deep linking URIs and smart web share URLs on all prompts to facilitate push notifications, WhatsApp/SMS sharing, QR codes, and seamless app installs:
+### Smart Redirect URLs (`/p/{slug}`)
 
-### 3.1 Deep Link Schemes & URLs
-
-| Target | App URI Pattern | Web Share URL | Behavior |
-|---|---|---|---|
-| **Prompt Screen** | `prompter://prompt/{slug}` | `https://your-domain.com/prompt/{slug}` *(or `/p/{slug}`)* | Opens specific prompt in app. **If app is not installed, automatically redirects user to Google Play Store.** |
-| **Category Screen** | `prompter://category/{slug}` | `prompter://category/{slug}` | Navigates directly to category view in app. |
-| **Subcategory Screen** | `prompter://category/{catSlug}/sub/{subSlug}` | `prompter://category/{catSlug}/sub/{subSlug}` | Navigates directly to subcategory view in app. |
-
----
-
-### 3.2 How Web Deep-Linking & Play Store Fallback Works
-
-When a user in your client app taps **"Share Prompt"**, share the prompt's `shortUrl` or `shareUrl` (e.g. `https://your-domain.com/p/cyberpunk-portrait`):
-
-1. **Custom Short URL**: Compact, clean sharing links (`/p/{slug}`) that fit neatly in SMS, WhatsApp, social media, and chat captions.
-2. **Rich Social Preview**: When shared on WhatsApp, Telegram, Twitter, Facebook, or iMessage, the link displays rich Open Graph preview cards with the prompt's featured image, title, and category.
-3. **If App Is Installed**: Android automatically intercepts the link (via Android App Links or custom intent `prompter://prompt/{slug}`) and opens the specific prompt immediately inside the `com.codemario.prompter` app.
-4. **If App Is NOT Installed**: The mobile browser automatically detects that the app is missing and immediately redirects the user to the Google Play Store listing (`https://play.google.com/store/apps/details?id=com.codemario.prompter`).
-5. **Desktop / Web Fallback**: If opened on a computer, users see an interactive prompt landing page with 1-click "Copy Prompt", prompt tags, category badge, and a "Get it on Google Play" download button.
-
----
-
-### 3.3 Android App Links & Intent Filter Setup (`AndroidManifest.xml`)
-
-Add the following intent filters inside your `<activity>` in `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<activity
-    android:name=".MainActivity"
-    android:launchMode="singleTask"
-    ...>
-
-    <!-- 1. Custom URL Scheme (prompter://prompt/{slug}) -->
-    <intent-filter>
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data
-            android:scheme="prompter"
-            android:host="prompt" />
-    </intent-filter>
-
-    <!-- 2. Universal / App Links (https://your-domain.com/prompt/{slug}) -->
-    <intent-filter android:autoVerify="true">
-        <action android:name="android.intent.action.VIEW" />
-        <category android:name="android.intent.category.DEFAULT" />
-        <category android:name="android.intent.category.BROWSABLE" />
-        <data
-            android:scheme="https"
-            android:host="your-domain.com"
-            android:pathPrefix="/prompt" />
-        <data
-            android:scheme="https"
-            android:host="your-domain.com"
-            android:pathPrefix="/p" />
-    </intent-filter>
-
-</activity>
+When sharing prompts across WhatsApp, Instagram, Telegram, SMS, or QR codes, always use the short URL format:
+```text
+https://yourdomain.com/p/{slug}
 ```
 
----
+#### Smart Routing Behavior:
+1. **If App Installed**: Clicking the link opens the Android app directly via intent filter (`prompter://prompt/{slug}`).
+2. **If App NOT Installed**: Opens a fast browser landing page that immediately falls back and redirects to **Google Play Store**:  
+   `market://details?id=com.codemario.prompter` (or `https://play.google.com/store/apps/details?id=com.codemario.prompter`).
+3. **Rich Social Preview**: Serves OpenGraph and Twitter Cards metadata (prompt title, preview description, featured image).
 
-### 3.4 Flutter Deep Link Handling Code Example
-
-```dart
-import 'package:app_links/app_links.dart';
-import 'package:share_plus/share_plus.dart';
-
-class DeepLinkService {
-  static final _appLinks = AppLinks();
-
-  // 1. Initialize Deep Link Listener
-  static void init(Function(String slug) onPromptOpened) {
-    // Handle link when app is started from cold state
-    _appLinks.getInitialAppLink().then((uri) {
-      if (uri != null) _handleUri(uri, onPromptOpened);
-    });
-
-    // Handle incoming link while app is in background/foreground
-    _appLinks.uriLinkStream.listen((uri) {
-      _handleUri(uri, onPromptOpened);
-    });
-  }
-
-  static void _handleUri(Uri uri, Function(String slug) onPromptOpened) {
-    // Matches: prompter://prompt/{slug} OR https://your-domain.com/prompt/{slug}
-    if ((uri.scheme == 'prompter' && uri.host == 'prompt') ||
-        (uri.pathSegments.isNotEmpty && (uri.pathSegments.first == 'prompt' || uri.pathSegments.first == 'p'))) {
-      final slug = uri.pathSegments.last;
-      onPromptOpened(slug);
-    }
-  }
-
-  // 2. Share Prompt Function
-  static void sharePrompt({required String title, required String shareUrl}) {
-    Share.share(
-      'Check out this AI prompt "$title" on Prompter!\n$shareUrl',
-      subject: title,
-    );
-  }
-}
+### Android App Links (`/.well-known/assetlinks.json`)
+The server serves official Digital Asset Links at:
+```http
+GET https://yourdomain.com/.well-known/assetlinks.json
 ```
+Enables Android to verify ownership and open `https://yourdomain.com/p/*` directly in `com.codemario.prompter` without showing the browser chooser dialog.
 
 ---
 
-## 4. Endpoints Reference
+## 4. API Endpoints Reference
 
-### 4.1 `GET /api/v1/app-config`
-Retrieves app boot metadata, versioning, contact info, and maintenance mode status. Client apps should call this on splash screen launch.
+---
 
-#### Headers
-| Header | Type | Required | Description |
-|---|---|---|---|
-| `x-api-key` | string | Yes | Client API authentication key |
+### 4.1 App Configuration
+Retrieve global branding, maintenance mode status, minimum app version, and package identity.
+
+- **Method:** `GET`
+- **URL:** `/api/v1/app-config`
+- **Headers:** `x-api-key: YOUR_KEY`
 
 #### Response (`200 OK`)
 ```json
@@ -213,19 +138,19 @@ Retrieves app boot metadata, versioning, contact info, and maintenance mode stat
   "success": true,
   "data": {
     "appName": "Prompter",
-    "developerName": "PromptForge Studio",
+    "developerName": "CodeMario",
     "packageName": "com.codemario.prompter",
     "versionName": "1.0.0",
     "versionCode": "100",
     "maintenanceMode": false,
-    "appLogo": "/logo.png",
-    "splashLogo": "/splash.png",
-    "appIcon": "/icon.png",
+    "appLogo": "https://yourdomain.com/uploads/logo.png",
+    "splashLogo": "https://yourdomain.com/uploads/splash.png",
+    "appIcon": "https://yourdomain.com/uploads/icon.png",
     "favicon": "/favicon.ico",
-    "supportEmail": "support@prompter.io",
-    "website": "https://prompter.io",
-    "contactNumber": "+1 (555) 019-2834",
-    "copyright": "© 2026 Prompter Studio. All rights reserved.",
+    "supportEmail": "support@codemario.com",
+    "website": "https://codemario.com",
+    "contactNumber": "+1234567890",
+    "copyright": "© 2026 CodeMario. All rights reserved.",
     "defaultLanguage": "en",
     "currency": "USD"
   }
@@ -234,33 +159,32 @@ Retrieves app boot metadata, versioning, contact info, and maintenance mode stat
 
 ---
 
-### 4.2 `GET /api/v1/urls`
-Retrieves all legal policy URLs, app store download links, and social community channels.
+### 4.2 Legal, Social & Store URLs
+Retrieve official legal policies, data deletion links, and social channel URLs.
 
-#### Headers
-| Header | Type | Required | Description |
-|---|---|---|---|
-| `x-api-key` | string | Yes | Client API authentication key |
+- **Method:** `GET`
+- **URL:** `/api/v1/urls`
+- **Headers:** `x-api-key: YOUR_KEY`
 
 #### Response (`200 OK`)
 ```json
 {
   "success": true,
   "data": {
-    "privacyPolicy": "https://prompter.io/privacy",
-    "termsOfService": "https://prompter.io/terms",
-    "refundPolicy": "https://prompter.io/refund",
-    "dataDeletionPolicy": "https://prompter.io/data-deletion",
-    "contactUs": "https://prompter.io/contact",
-    "aboutUs": "https://prompter.io/about",
-    "website": "https://prompter.io",
-    "playStore": "https://play.google.com/store/apps/details?id=com.prompter.app",
+    "privacyPolicy": "https://yourdomain.com/privacy",
+    "termsOfService": "https://yourdomain.com/terms",
+    "refundPolicy": "https://yourdomain.com/refund",
+    "dataDeletionPolicy": "https://yourdomain.com/data-deletion",
+    "contactUs": "https://yourdomain.com/contact",
+    "aboutUs": "https://yourdomain.com/about",
+    "website": "https://yourdomain.com",
+    "playStore": "https://play.google.com/store/apps/details?id=com.codemario.prompter",
     "socialLinks": {
-      "twitter": "https://twitter.com/prompter_app",
-      "facebook": "https://facebook.com/prompterapp",
-      "instagram": "https://instagram.com/prompter_app",
-      "youtube": "https://youtube.com/@prompterapp",
-      "telegram": "https://t.me/prompter_community"
+      "twitter": "https://twitter.com/prompter",
+      "facebook": "https://facebook.com/prompter",
+      "instagram": "https://instagram.com/prompter",
+      "youtube": "https://youtube.com/@prompter",
+      "telegram": "https://t.me/prompter_official"
     }
   }
 }
@@ -268,15 +192,14 @@ Retrieves all legal policy URLs, app store download links, and social community 
 
 ---
 
-### 4.3 `GET /api/v1/ads`
-Fetches dynamic ad network configuration and display frequency interval counters. The backend enforces a **single active provider constraint** (`ADMOB`, `META`, or `UNITY`). Client apps should query this during startup to initialize the corresponding ad SDK and configure ad trigger intervals.
+### 4.3 Ad Network Configuration
+Retrieve real-time ad network settings (AdMob, Meta Audience Network, or Unity Ads), ad unit IDs, and frequency caps.
 
-#### Headers
-| Header | Type | Required | Description |
-|---|---|---|---|
-| `x-api-key` | string | Yes | Client API authentication key |
+- **Method:** `GET`
+- **URL:** `/api/v1/ads`
+- **Headers:** `x-api-key: YOUR_KEY`
 
-#### Response (`200 OK` - Google AdMob Example)
+#### Response (`200 OK`)
 ```json
 {
   "success": true,
@@ -298,91 +221,16 @@ Fetches dynamic ad network configuration and display frequency interval counters
 }
 ```
 
-#### Response (`200 OK` - Ads Disabled)
-```json
-{
-  "success": true,
-  "data": {
-    "activeProvider": "NONE",
-    "adsEnabled": false,
-    "interstitialInterval": 3,
-    "nativeInterval": 5,
-    "provider": null
-  }
-}
-```
-
-#### Interval Counters Reference
-| Field | Type | Default | Description | Mobile Client Usage |
-|---|---|---|---|---|
-| `interstitialInterval` | integer | `3` | Number of user actions before displaying an interstitial ad | Increment an action counter on prompt click, copy, or detail view. Show full-screen interstitial when `counter % interstitialInterval === 0`. |
-| `nativeInterval` | integer | `5` | Feed item spacing before inserting a native ad card | Insert an inline native ad card into RecyclerView / FlatList after every $Y$ prompt items (`itemIndex % nativeInterval === 0`). |
-
 ---
 
-### 4.4 `GET /api/v1/categories`
-Returns all active categories sorted in the exact custom display order configured in the admin panel (`position asc`), including live active prompt counts, nested active subcategories, and deep links.
+### 4.4 Category Taxonomy
+Retrieve all active categories, nested active subcategories, prompt counts, and direct deep links.
 
-#### Headers
-| Header | Type | Required | Description |
-|---|---|---|---|
-| `x-api-key` | string | Yes | Client API authentication key |
-
-#### Query Parameters
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `isFeatured` | string | No | `'true'` to fetch only featured categories, `'false'` for non-featured. Omit to retrieve all active categories. |
-
-#### Response (`200 OK`)
-```json
-{
-  "success": true,
-  "count": 6,
-  "data": [
-    {
-      "id": "cmtl3wkmy00048trf3otdjmh4",
-      "title": "Coding & Architecture",
-      "slug": "coding-architecture",
-      "image": "/uploads/1788599230610-10bb9092e989.png",
-      "position": 1,
-      "isFeatured": true,
-      "promptCount": 4,
-      "subcategories": [
-        {
-          "id": "cmu123sub001",
-          "title": "Next.js & React",
-          "slug": "nextjs-react",
-          "image": null,
-          "position": 1,
-          "promptCount": 2,
-          "deepLink": "prompter://category/coding-architecture/sub/nextjs-react"
-        },
-        {
-          "id": "cmu123sub002",
-          "title": "Python & Data Science",
-          "slug": "python-data-science",
-          "image": null,
-          "position": 2,
-          "promptCount": 2,
-          "deepLink": "prompter://category/coding-architecture/sub/python-data-science"
-        }
-      ],
-      "deepLink": "prompter://category/coding-architecture"
-    }
-  ]
-}
-```
-
----
-
-### 4.5 `GET /api/v1/subcategories`
-Retrieves a list of active subcategories with parent category details, prompt counts, and deep links.
-
-#### Query Parameters
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `category` | string | No | Filter subcategories by Parent Category ID or Slug |
-| `search` | string | No | Search subcategories by title or slug |
+- **Method:** `GET`
+- **URL:** `/api/v1/categories`
+- **Query Parameters:**
+  - `featured=true` *(optional: filter only featured categories)*
+- **Headers:** `x-api-key: YOUR_KEY`
 
 #### Response (`200 OK`)
 ```json
@@ -391,19 +239,25 @@ Retrieves a list of active subcategories with parent category details, prompt co
   "count": 2,
   "data": [
     {
-      "id": "cmu123sub001",
-      "title": "Next.js & React",
-      "slug": "nextjs-react",
-      "image": null,
+      "id": "cat_art_101",
+      "title": "Digital Art",
+      "slug": "digital-art",
+      "image": "https://yourdomain.com/uploads/art.png",
       "position": 1,
-      "categoryId": "cmtl3wkmy00048trf3otdjmh4",
-      "category": {
-        "id": "cmtl3wkmy00048trf3otdjmh4",
-        "title": "Coding & Architecture",
-        "slug": "coding-architecture"
-      },
-      "promptCount": 2,
-      "deepLink": "prompter://category/coding-architecture/sub/nextjs-react"
+      "isFeatured": true,
+      "promptCount": 42,
+      "subcategories": [
+        {
+          "id": "sub_3d_201",
+          "title": "3D Render & Unreal Engine",
+          "slug": "3d-render",
+          "image": "https://yourdomain.com/uploads/3d.png",
+          "position": 1,
+          "promptCount": 18,
+          "deepLink": "prompter://category/digital-art/sub/3d-render"
+        }
+      ],
+      "deepLink": "prompter://category/digital-art"
     }
   ]
 }
@@ -411,37 +265,59 @@ Retrieves a list of active subcategories with parent category details, prompt co
 
 ---
 
-### 4.6 `GET /api/v1/prompts`
-Returns a paginated list of published prompts with multi-filtering, search, and 7 sorting modes.
+### 4.5 Subcategories
+Retrieve standalone or filtered subcategories with parent category details and prompt counts.
 
-#### Query Parameters
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `page` | integer | `1` | Page number for pagination |
-| `limit` | integer | `10` | Items per page (minimum `1`, maximum `50`) |
-| `search` | string | - | Full-text search across Title, Prompt content, and Tags |
-| `category` | string | - | Filter by Category ID or Category Slug |
-| `subcategory` | string | - | Filter by Subcategory ID or Subcategory Slug |
-| `isPremium` | string | - | `'true'` for VIP only, `'false'` for Free only. Omit for all. |
-| `isFeatured` | string | - | `'true'` for Featured only, `'false'` for non-featured. Omit for all prompts. |
-| `sortBy` | string | `latest` | Options: `latest`, `oldest`, `random`, `trending`, `popular`, `views`, `likes` |
-| `seed` | integer | - | Random seed for `sortBy=random`. Pass the `seed` from the previous page to guarantee **zero item repetition** across pagination. |
+- **Method:** `GET`
+- **URL:** `/api/v1/subcategories`
+- **Query Parameters:**
+  - `category` *(optional: Category ID or Slug to filter)*
+  - `search` *(optional: Search string across subcategory titles)*
+- **Headers:** `x-api-key: YOUR_KEY`
 
-> **🔒 Taxonomy Status & Visibility Rules:**
-> - A prompt is **only visible** in the client app if its parent **Category is active** (`category.status = true`).
-> - If the prompt has an assigned **Subcategory**, that subcategory must **also be active** (`subcategory.status = true`).
-> - If either the parent category or the assigned subcategory is inactive (`status = false`), the prompt is automatically excluded from all feed results, category prompt counts, and direct access (`404 Not Found`). Prompts with no assigned subcategory (`subcategoryId: null`) are visible as long as their parent category is active.
+#### Response (`200 OK`)
+```json
+{
+  "success": true,
+  "count": 1,
+  "data": [
+    {
+      "id": "sub_3d_201",
+      "title": "3D Render & Unreal Engine",
+      "slug": "3d-render",
+      "image": "https://yourdomain.com/uploads/3d.png",
+      "position": 1,
+      "promptCount": 18,
+      "category": {
+        "id": "cat_art_101",
+        "title": "Digital Art",
+        "slug": "digital-art"
+      },
+      "deepLink": "prompter://category/digital-art/sub/3d-render"
+    }
+  ]
+}
+```
 
-#### Sorting Algorithms
-- `latest`: Ordered by `createdAt DESC`.
-- `oldest`: Ordered by `createdAt ASC`.
-- `trending`: Calculated viral momentum score:
-  $$\text{TrendingScore} = (\text{Views} \times 0.4) + (\text{Likes} \times 0.4) + (\text{Shares} \times 0.2)$$
-- `popular`: Total volume score:
-  $$\text{PopularScore} = \text{Likes} + \text{Shares} + \text{Views}$$
-- `views`: Ordered by `views DESC`.
-- `likes`: Ordered by `likes DESC`.
-- `random`: Pseudo-random seeded hash. Zero duplicates across subsequent pages when reusing the `seed`.
+---
+
+### 4.6 Prompts Feed & Search
+Main discovery feed supporting pagination, search, category/subcategory filtering, and deterministic random sorting.
+
+- **Method:** `GET`
+- **URL:** `/api/v1/prompts`
+- **Query Parameters:**
+  - `page` *(default: `1`)*
+  - `limit` *(default: `10`, max: `50`)*
+  - `category` *(optional: Category ID or Slug)*
+  - `subcategory` *(optional: Subcategory ID or Slug)*
+  - `search` *(optional: searches prompt title, description, and tags)*
+  - `sortBy` *(optional: `latest`, `popular`, `trending`, `views`, `likes`, `random`)*
+  - `seed` *(optional: integer seed for deterministic random pagination, e.g. `seed=42`)*
+  - `isPremium` *(optional: `true` / `false`)*
+  - `isFeatured` *(optional: `true` / `false`)*
+  - `deviceId` or `userId` *(optional: checks `isLiked` state)*
+- **Headers:** `x-api-key: YOUR_KEY`
 
 #### Response (`200 OK`)
 ```json
@@ -449,256 +325,184 @@ Returns a paginated list of published prompts with multi-filtering, search, and 
   "success": true,
   "data": [
     {
-      "id": "cmtl3wkpo000u8trf6k7s9b8v",
-      "title": "Full-Stack Next.js 14 Clean Architecture Blueprint",
-      "slug": "full-stack-next-js-14-clean-architecture-blueprint",
-      "prompt": "Act as a Principal Software Architect. Design an enterprise Next.js 14 App Router application...",
-      "featuredImage": "/uploads/1788599230610-10bb9092e989.png",
+      "id": "clt987654321",
+      "title": "Cyberpunk Neon Samurai",
+      "slug": "cyberpunk-neon-samurai",
+      "prompt": "Cinematic portrait of a robotic ronin standing in Tokyo neon rain, 8k octane render, volumetric lighting...",
+      "featuredImage": "https://yourdomain.com/uploads/cyberpunk.png",
       "category": {
-        "id": "cmtl3wkmy00048trf3otdjmh4",
-        "title": "Coding & Architecture",
-        "slug": "coding-architecture",
-        "image": "/uploads/1788599230610-10bb9092e989.png"
+        "id": "cat_art_101",
+        "title": "Digital Art",
+        "slug": "digital-art",
+        "image": "https://yourdomain.com/uploads/art.png"
       },
       "subcategory": {
-        "id": "cmu123sub001",
-        "title": "Next.js & React",
-        "slug": "nextjs-react",
-        "image": null
+        "id": "sub_3d_201",
+        "title": "3D Render",
+        "slug": "3d-render"
       },
-      "tags": ["nextjs", "react", "architecture", "typescript"],
-      "likes": 840,
-      "views": 18200,
-      "shares": 310,
+      "tags": ["cyberpunk", "samurai", "neon", "midjourney"],
+      "likes": 128,
+      "views": 1540,
+      "shares": 45,
       "isPremium": false,
       "isFeatured": true,
       "isLiked": false,
-      "trendingScore": 7678,
-      "popularScore": 19350,
-      "deepLink": "prompter://prompt/full-stack-next-js-14-clean-architecture-blueprint",
-      "createdAt": "2026-09-01T10:15:00.000Z"
+      "trendingScore": 84.5,
+      "popularScore": 92.1,
+      "deepLink": "prompter://prompt/cyberpunk-neon-samurai",
+      "shortUrl": "https://yourdomain.com/p/cyberpunk-neon-samurai",
+      "shareUrl": "https://yourdomain.com/p/cyberpunk-neon-samurai",
+      "createdAt": "2026-11-01T12:00:00.000Z"
     }
   ],
   "pagination": {
     "page": 1,
     "limit": 10,
-    "total": 8,
-    "totalPages": 1,
-    "hasMore": false,
-    "seed": 847291
+    "total": 85,
+    "totalPages": 9,
+    "hasMore": true,
+    "seed": 42
   }
 }
 ```
 
 ---
 
-### 4.6 `GET /api/v1/prompts/:id`
-Fetches complete details for a single prompt using either its database ID or URL slug.
+### 4.7 Prompt Detail
+Retrieve a complete prompt object by ID or unique slug. Includes ready-to-share strings and store metadata.
 
-#### Path Parameters
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `id` | string | Yes | Prompt unique ID (`cmtl...`) or slug (`full-stack-next-js-...`) |
+- **Method:** `GET`
+- **URL:** `/api/v1/prompts/{id}` *(where `{id}` is either the prompt ID or Slug)*
+- **Query Parameters:**
+  - `deviceId` or `userId` *(optional: to check `isLiked`)*
+- **Headers:** `x-api-key: YOUR_KEY`
 
 #### Response (`200 OK`)
 ```json
 {
   "success": true,
   "data": {
-    "id": "cmtl3wkpo000u8trf6k7s9b8v",
-    "title": "Full-Stack Next.js 14 Clean Architecture Blueprint",
-    "slug": "full-stack-next-js-14-clean-architecture-blueprint",
-    "prompt": "Act as a Principal Software Architect. Design an enterprise Next.js 14 App Router application...",
-    "featuredImage": "/uploads/1788599230610-10bb9092e989.png",
-    "category": {
-      "id": "cmtl3wkmy00048trf3otdjmh4",
-      "title": "Coding & Architecture",
-      "slug": "coding-architecture",
-      "image": "/uploads/1788599230610-10bb9092e989.png"
-    },
-    "tags": ["nextjs", "react", "architecture", "typescript"],
-    "likes": 840,
-    "views": 18200,
-    "shares": 310,
+    "id": "clt987654321",
+    "title": "Cyberpunk Neon Samurai",
+    "slug": "cyberpunk-neon-samurai",
+    "prompt": "Cinematic portrait of a robotic ronin standing in Tokyo neon rain, 8k octane render...",
+    "featuredImage": "https://yourdomain.com/uploads/cyberpunk.png",
+    "tags": ["cyberpunk", "samurai", "neon"],
+    "likes": 129,
+    "views": 1541,
+    "shares": 45,
+    "copies": 310,
     "isPremium": false,
     "isFeatured": true,
-    "trendingScore": 7678,
-    "popularScore": 19350,
-    "deepLink": "prompter://prompt/full-stack-next-js-14-clean-architecture-blueprint",
-    "createdAt": "2026-09-01T10:15:00.000Z"
-  }
-}
-```
-
----
-
-### 4.7 `POST /api/v1/prompts/:id/action`
-Records a user engagement interaction (`like`, `unlike`, `view`, `copy`, `share`).
-
-> [!IMPORTANT]
-> **Dynamic Activity Tracking**: Every action (`like`, `unlike`, `view`, `copy`, `share`) records a timestamped `PromptActivity` row and updates prompt counters. These activity logs directly power the dynamic **Today**, **Weekly**, and **Monthly** trending calculations.
-> - **Unique Likes**: Pass `userId` or `deviceId`. Likes are strictly unique per user/device. Submitting `type: "like"` increments only once. Pass `type: "unlike"` or `toggle: true` to unlike.
-> - **Copy Action**: Pass `type: "copy"`. Atomically increments the `copies` counter and records an activity row.
-> - **View Deduplication**: Views have a 15-minute client-fingerprint deduplication window to prevent inflation from rapid reloads.
-> - **Share Action**: Atomically increments the `shares` counter and records an activity row.
-
-#### Path Parameters
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `id` | string | Yes | Prompt ID or URL slug |
-
-#### Request Body (`application/json`)
-```json
-{
-  "type": "copy",
-  "userId": "sarah.jenkins@gmail.com",
-  "deviceId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"
-}
-```
-*Note: `userId` or `deviceId` can also be passed via `x-user-id` or `x-device-id` headers.*
-
-| Body Field | Type | Required | Description |
-|---|---|---|---|
-| `type` | string | Yes | Action type: `"copy"`, `"like"`, `"unlike"`, `"share"`, `"view"` |
-| `userId` | string | Recommended | User identifier or Google email for authenticated users |
-| `deviceId` | string | Optional | Client device installation UUID for anonymous users |
-| `toggle` | boolean | Optional | If `true` and already liked, calling `"like"` will unlike the prompt |
-
-#### Response (`200 OK` - Copy Action Recorded)
-```json
-{
-  "success": true,
-  "action": "copy",
-  "message": "Prompt copied",
-  "data": {
-    "id": "cmtl3wkpo000u8trf6k7s9b8v",
-    "slug": "full-stack-next-js-14-clean-architecture-blueprint",
-    "likes": 841,
-    "views": 18200,
-    "copies": 532,
-    "shares": 310,
     "isLiked": true,
-    "trendingScore": 7678.4,
-    "popularScore": 19883
+    "category": {
+      "id": "cat_art_101",
+      "title": "Digital Art",
+      "slug": "digital-art",
+      "image": "https://yourdomain.com/uploads/art.png"
+    },
+    "subcategory": {
+      "id": "sub_3d_201",
+      "title": "3D Render",
+      "slug": "3d-render"
+    },
+    "deepLink": "prompter://prompt/cyberpunk-neon-samurai",
+    "shortUrl": "https://yourdomain.com/p/cyberpunk-neon-samurai",
+    "shareUrl": "https://yourdomain.com/p/cyberpunk-neon-samurai",
+    "shareText": "Check out \"Cyberpunk Neon Samurai\" on Prompter:\nhttps://yourdomain.com/p/cyberpunk-neon-samurai",
+    "packageName": "com.codemario.prompter",
+    "playStoreUrl": "https://play.google.com/store/apps/details?id=com.codemario.prompter",
+    "createdAt": "2026-11-01T12:00:00.000Z",
+    "updatedAt": "2026-11-02T15:30:00.000Z"
   }
 }
 ```
 
 ---
 
-### 4.8 `GET /api/v1/trending`
-Retrieves dynamically ranked trending prompts categorized across four separate timeframes:
-1. **Today Trending** – Prompts ranked by user activity since 00:00:00 of the current calendar day (using configured app timezone).
-2. **Weekly Trending** – Prompts ranked by activity since the start of the current week (ISO Monday 00:00:00).
-3. **Monthly Trending** – Prompts ranked by activity since the 1st day of the current calendar month (00:00:00).
-4. **All-Time Trending** – Prompts ranked by overall lifetime popularity since publication.
+### 4.8 User Engagement Action
+Record client-side user events (views, likes, shares, copies). Handles idempotency and like toggling.
 
-> [!NOTE]
-> **Ranking Formula**:
-> $$\text{Score} = (\text{Views} \times W_v) + (\text{Likes} \times W_l) + (\text{Copies} \times W_c) + (\text{Shares} \times W_s)$$
-> *(Default weights: Views = 1.0, Likes = 3.0, Copies = 5.0, Shares = 4.0; configurable in Admin Panel).*  
-> Deleted, draft, inactive prompts, and prompts under inactive categories/subcategories are strictly excluded.
+- **Method:** `POST`
+- **URL:** `/api/v1/prompts/{id}/action`
+- **Headers:**
+  - `x-api-key: YOUR_KEY`
+  - `Content-Type: application/json`
 
-#### Query Parameters
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `period` | string | No | `all` | Specific period: `"today"`, `"weekly"`, `"monthly"`, `"all_time"`. Omit to return all 4 categories in a single call. |
-| `limit` | integer | No | Admin config (10) | Maximum number of ranked prompts returned per category (max 100). |
-| `userId` | string | No | `null` | Google email or user ID to calculate personalized `isLiked` status. |
-| `deviceId` | string | No | `null` | Client device installation UUID to calculate personalized `isLiked` status. |
-
-#### Response (`200 OK` - All 4 Categories)
+#### Request Body
 ```json
 {
-  "success": true,
-  "data": {
-    "today": {
-      "period": "today",
-      "title": "Today's Trending",
-      "startDate": "2026-10-27T00:00:00.000Z",
-      "prompts": [
-        {
-          "id": "cmtl3wkpo000u8trf6k7s9b8v",
-          "title": "Full-Stack Next.js 14 Clean Architecture Blueprint",
-          "slug": "full-stack-next-js-14-clean-architecture-blueprint",
-          "prompt": "Act as a Principal Software Architect...",
-          "featuredImage": "/uploads/nextjs-arch.png",
-          "category": {
-            "id": "cmtl3wkmy00048trf3otdjmh4",
-            "title": "Coding & Architecture",
-            "slug": "coding-architecture",
-            "image": "/uploads/coding.png"
-          },
-          "tags": ["nextjs", "react", "architecture"],
-          "likes": 841,
-          "views": 18200,
-          "shares": 310,
-          "copies": 532,
-          "isPremium": false,
-          "isFeatured": true,
-          "isLiked": true,
-          "score": 48.0,
-          "rank": 1,
-          "periodActivity": {
-            "views": 18,
-            "likes": 5,
-            "copies": 3,
-            "shares": 0
-          },
-          "createdAt": "2026-09-01T10:15:00.000Z"
-        }
-      ]
-    },
-    "weekly": {
-      "period": "weekly",
-      "title": "Weekly Trending",
-      "startDate": "2026-10-26T00:00:00.000Z",
-      "prompts": [ ... ]
-    },
-    "monthly": {
-      "period": "monthly",
-      "title": "Monthly Trending",
-      "startDate": "2026-10-01T00:00:00.000Z",
-      "prompts": [ ... ]
-    },
-    "all_time": {
-      "period": "all_time",
-      "title": "All-Time Trending",
-      "prompts": [ ... ]
-    }
-  },
-  "config": {
-    "maxPromptsPerCategory": 10,
-    "weights": {
-      "views": 1,
-      "likes": 3,
-      "copies": 5,
-      "shares": 4
-    }
-  }
+  "type": "like",
+  "deviceId": "android-device-uuid-12345",
+  "userId": "user@example.com",
+  "toggle": true
 }
 ```
 
-#### Response (`200 OK` - Single Period Query, e.g. `?period=today`)
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `type` | `string` | **Yes** | One of: `"like"`, `"unlike"`, `"view"`, `"share"`, `"copy"` |
+| `deviceId` | `string` | **Yes** *(or `userId`)* | Device installation identifier |
+| `userId` | `string` | Optional | User email or account ID if signed in |
+| `toggle` | `boolean`| Optional | If `true` and `type="like"`, automatically un-likes if already liked |
+
+#### Response (`200 OK`)
+```json
+{
+  "success": true,
+  "action": "like",
+  "isLiked": true,
+  "likes": 130,
+  "views": 1541,
+  "shares": 45,
+  "copies": 310
+}
+```
+
+---
+
+### 4.9 Dynamic Trending Prompts
+Retrieve trending prompts calculated in real-time based on weighted user interactions and time decay.
+
+- **Method:** `GET`
+- **URL:** `/api/v1/trending`
+- **Query Parameters:**
+  - `period` *(optional: `today`, `weekly`, `monthly`, `all_time`. Default: highest configured)*
+  - `limit` *(optional: prompts count limit, e.g. `20`)*
+  - `deviceId` or `userId` *(optional: checks `isLiked`)*
+- **Headers:** `x-api-key: YOUR_KEY`
+
+#### Response (`200 OK`)
 ```json
 {
   "success": true,
   "period": "today",
-  "title": "Today's Trending",
-  "startDate": "2026-10-27T00:00:00.000Z",
-  "data": [
+  "total": 15,
+  "prompts": [
     {
-      "id": "cmtl3wkpo000u8trf6k7s9b8v",
-      "title": "Full-Stack Next.js 14 Clean Architecture Blueprint",
-      "slug": "full-stack-next-js-14-clean-architecture-blueprint",
-      "score": 48.0,
-      "rank": 1,
-      "periodActivity": {
-        "views": 18,
-        "likes": 5,
-        "copies": 3,
-        "shares": 0
-      }
+      "id": "clt987654321",
+      "title": "Hyper-Realistic Cyber Samurai",
+      "slug": "hyper-realistic-cyber-samurai",
+      "prompt": "A futuristic warrior...",
+      "featuredImage": "https://yourdomain.com/uploads/samurai.png",
+      "likes": 240,
+      "views": 3200,
+      "shares": 85,
+      "copies": 510,
+      "score": 142.5,
+      "deepLink": "prompter://prompt/hyper-realistic-cyber-samurai",
+      "shortUrl": "https://yourdomain.com/p/hyper-realistic-cyber-samurai"
+    }
+  ],
+  "groupedByCategory": [
+    {
+      "category": {
+        "id": "cat_art_101",
+        "title": "Digital Art",
+        "slug": "digital-art"
+      },
+      "prompts": [ ... ]
     }
   ]
 }
@@ -706,22 +510,92 @@ Retrieves dynamically ranked trending prompts categorized across four separate t
 
 ---
 
-### 4.9 `POST /api/v1/users/sync`
-Registers or synchronizes a client app end-user who signed in via **Google Sign-In**. If the user already exists, updates their display name, avatar, and last active timestamp. If the user was blocked by an administrator, returns HTTP `403 Forbidden`.
+### 4.10 Push Notification Feed
+Retrieve past sent push notifications to display in the client app's Notification Center.
 
-#### Headers
-| Header | Type | Required | Description |
-|---|---|---|---|
-| `x-api-key` | string | Yes | Client API authentication key |
-| `Content-Type` | string | Yes | `application/json` |
+- **Method:** `GET`
+- **URL:** `/api/v1/notifications`
+- **Query Parameters:**
+  - `limit` *(default: `20`, max: `50`)*
+- **Headers:** `x-api-key: YOUR_KEY`
 
-#### Request Body (`application/json`)
+#### Response (`200 OK`)
 ```json
 {
-  "email": "sarah.jenkins@gmail.com",
-  "name": "Sarah Jenkins",
-  "avatar": "https://lh3.googleusercontent.com/a/...",
-  "appVersion": "1.2.0"
+  "success": true,
+  "data": [
+    {
+      "id": "notif_881920",
+      "title": "🔥 Top Trending Prompts This Week",
+      "message": "Explore the most copied Midjourney and ChatGPT prompts right now!",
+      "image": "https://yourdomain.com/uploads/banner_trend.png",
+      "deepLink": "prompter://trending",
+      "sentAt": "2026-11-03T10:00:00.000Z",
+      "createdAt": "2026-11-03T09:55:00.000Z"
+    }
+  ],
+  "meta": {
+    "count": 1
+  }
+}
+```
+
+---
+
+### 4.11 Register FCM Device Token
+Register or refresh an Android / iOS Firebase Cloud Messaging device token for targeted and broadcast push notifications.
+
+- **Method:** `POST`
+- **URL:** `/api/v1/notifications/token`
+- **Headers:**
+  - `x-api-key: YOUR_KEY`
+  - `Content-Type: application/json`
+
+#### Request Body
+```json
+{
+  "token": "eXample_FCM_Token_982734190823...",
+  "deviceId": "android-device-uuid-12345",
+  "userId": "user@example.com",
+  "platform": "android",
+  "appVersion": "1.0.0"
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `token` | `string` | **Yes** | FCM registration token from Firebase SDK |
+| `deviceId` | `string` | Optional | Device identifier |
+| `userId` | `string` | Optional | User ID or email if signed in |
+| `platform` | `string` | Optional | `"android"` (default) or `"ios"` |
+| `appVersion` | `string` | Optional | Installed app version (e.g. `"1.0.0"`) |
+
+#### Response (`200 OK`)
+```json
+{
+  "success": true,
+  "message": "FCM device token registered successfully"
+}
+```
+
+---
+
+### 4.12 User Profile Sync
+Synchronize Google Sign-In or social user data with the backend database. Also verifies if user is blocked.
+
+- **Method:** `POST`
+- **URL:** `/api/v1/users/sync`
+- **Headers:**
+  - `x-api-key: YOUR_KEY`
+  - `Content-Type: application/json`
+
+#### Request Body
+```json
+{
+  "email": "developer@codemario.com",
+  "name": "Mario Code",
+  "avatar": "https://lh3.googleusercontent.com/a/sample-photo",
+  "appVersion": "1.0.0"
 }
 ```
 
@@ -730,230 +604,239 @@ Registers or synchronizes a client app end-user who signed in via **Google Sign-
 {
   "success": true,
   "data": {
-    "id": "cmtl8x...9v",
-    "name": "Sarah Jenkins",
-    "email": "sarah.jenkins@gmail.com",
-    "avatar": "https://lh3.googleusercontent.com/a/...",
-    "authProvider": "GOOGLE",
+    "id": "app_user_44921",
+    "email": "developer@codemario.com",
+    "name": "Mario Code",
+    "avatar": "https://lh3.googleusercontent.com/a/sample-photo",
+    "isVip": false,
     "status": "ACTIVE",
-    "isVip": true,
-    "likesCount": 42,
-    "createdAt": "2026-09-08T14:20:00.000Z"
+    "likesCount": 14,
+    "createdAt": "2026-10-15T08:20:00.000Z"
   }
 }
 ```
 
----
-
-## 5. Special Implementations
-
-### Deterministic Non-Repeating Random Sorting
-When building an infinite scroll or paginated random feed, a standard SQL `ORDER BY RANDOM()` causes items to repeat across page 1 and page 2, or skip items entirely.
-
-Prompter solves this by returning a numeric **`seed`** in `pagination.seed` on the first page:
-1. Client requests page 1: `GET /api/v1/prompts?sortBy=random&page=1`
-2. Server returns items and `pagination.seed: 739104`.
-3. For page 2, client sends the seed: `GET /api/v1/prompts?sortBy=random&page=2&seed=739104`
-4. Result: **Zero duplicate items** across pages. To refresh the feed, simply omit the `seed` to get a fresh shuffle.
+*(If the user has been banned/suspended by administration, this returns `403 Forbidden` with `"error": "This user account has been suspended by administration."`).*
 
 ---
 
-### Ad Network Runtime Initialization
-Client mobile apps should follow this boot sequence:
-```mermaid
-sequenceDiagram
-    participant App as Mobile App
-    participant API as Prompter API
-    participant SDK as Ad Network SDK
+### 4.13 Uploaded Files & Images
+Retrieve images and logos stored on the backend.
 
-    App->>API: GET /api/v1/ads
-    API-->>App: { activeProvider: "ADMOB", adsEnabled: true, provider: {...} }
-    alt adsEnabled == true
-        App->>SDK: Initialize Google AdMob (appId)
-        App->>SDK: Preload Banner / Interstitial placements
-    else adsEnabled == false
-        App->>App: Disable Ad views & banners
-    end
+- **Method:** `GET`
+- **URL:** `/uploads/{filename}` *(e.g. `/uploads/1728901234-image.png`)*
+- **Headers:** None required (public binary image endpoint).
+
+---
+
+## 5. Client Integration Guide
+
+### Android Manifest Deep Linking Config
+Add the following `<intent-filter>` tags to your `MainActivity` in `AndroidManifest.xml` (`package="com.codemario.prompter"`):
+
+```xml
+<activity
+    android:name=".MainActivity"
+    android:exported="true">
+    
+    <!-- Standard Launcher -->
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+
+    <!-- Custom Scheme Deep Linking: prompter://prompt/{slug} -->
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="prompter" android:host="prompt" />
+        <data android:scheme="prompter" android:host="category" />
+    </intent-filter>
+
+    <!-- Verified App Links: https://yourdomain.com/p/{slug} -->
+    <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="https"
+              android:host="yourdomain.com"
+              android:pathPrefix="/p/" />
+        <data android:scheme="https"
+              android:host="yourdomain.com"
+              android:pathPrefix="/prompt/" />
+    </intent-filter>
+</activity>
 ```
 
----
-
-### Maintenance Mode Handling
-Check `maintenanceMode` in `GET /api/v1/app-config`:
-```typescript
-if (config.maintenanceMode) {
-  // Show dedicated full-screen maintenance message
-  showMaintenanceScreen(config.appName);
-} else {
-  // Proceed with normal app loading
-  loadAppMainFlow();
-}
-```
+### Deterministic Non-Repeating Random Pagination
+When implementing infinite scrolling with `sortBy=random`:
+1. On **Page 1**, do not pass a `seed` parameter.
+2. The server generates a random seed (e.g. `seed: 4281`) and returns it in `pagination.seed`.
+3. For all subsequent pages (**Page 2, 3, 4...**), pass the same `seed=4281` query parameter:
+   ```http
+   GET /api/v1/prompts?sortBy=random&page=2&seed=4281
+   ```
+4. This guarantees that items are uniquely shuffled across the entire dataset without duplicate prompts appearing across pages.
 
 ---
 
 ## 6. Code Samples
 
-### cURL
-```bash
-# 1. Fetch App Configuration
-curl -X GET "http://localhost:3000/api/v1/app-config" \
-  -H "x-api-key: prompter_live_sec_7f8a9b1c2d3e4f5a"
+### Kotlin (Android)
 
-# 2. Get Trending Prompts
-curl -X GET "http://localhost:3000/api/v1/prompts?limit=5&sortBy=trending" \
-  -H "x-api-key: prompter_live_sec_7f8a9b1c2d3e4f5a"
-
-# 3. Register a Like
-curl -X POST "http://localhost:3000/api/v1/prompts/coding-architecture/action" \
-  -H "x-api-key: prompter_live_sec_7f8a9b1c2d3e4f5a" \
-  -H "Content-Type: application/json" \
-  -d '{"type": "like"}'
-```
-
----
-
-### TypeScript / JavaScript
-```typescript
-const BASE_URL = 'http://localhost:3000';
-const API_KEY = 'prompter_live_sec_7f8a9b1c2d3e4f5a';
-
-async function fetchPrompts({ page = 1, sortBy = 'latest', seed }: { page?: number; sortBy?: string; seed?: number }) {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: '10',
-    sortBy,
-    ...(seed ? { seed: String(seed) } : {}),
-  });
-
-  const res = await fetch(`${BASE_URL}/api/v1/prompts?${params}`, {
-    headers: {
-      'x-api-key': API_KEY,
-      'Accept': 'application/json',
-    },
-  });
-
-  if (!res.ok) throw new Error(`Error: ${res.status}`);
-  return await res.json();
-}
-```
-
----
-
-### Flutter / Dart
-```dart
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-class PrompterApi {
-  static const String baseUrl = 'http://localhost:3000';
-  static const String apiKey = 'prompter_live_sec_7f8a9b1c2d3e4f5a';
-
-  static Map<String, String> get _headers => {
-    'x-api-key': apiKey,
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  };
-
-  // Fetch Categories
-  static Future<List<dynamic>> getCategories() async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/api/v1/categories'),
-      headers: _headers,
-    );
-
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      return json['data'];
-    } else {
-      throw Exception('Failed to load categories');
-    }
-  }
-
-  // Like Prompt
-  static Future<void> likePrompt(String promptIdOrSlug) async {
-    await http.post(
-      Uri.parse('$baseUrl/api/v1/prompts/$promptIdOrSlug/action'),
-      headers: _headers,
-      body: jsonEncode({'type': 'like'}),
-    );
-  }
-}
-```
-
----
-
-### Android (Kotlin)
 ```kotlin
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.http.*
+import retrofit2.Response
+
+interface PrompterApiService {
+
+    @GET("api/v1/app-config")
+    suspend fun getAppConfig(
+        @Header("x-api-key") apiKey: String
+    ): Response<AppConfigResponse>
+
+    @GET("api/v1/prompts")
+    suspend fun getPrompts(
+        @Header("x-api-key") apiKey: String,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 10,
+        @Query("category") category: String? = null,
+        @Query("sortBy") sortBy: String = "latest",
+        @Query("seed") seed: Int? = null,
+        @Header("x-device-id") deviceId: String
+    ): Response<PromptsResponse>
+
+    @POST("api/v1/prompts/{id}/action")
+    suspend fun sendEngagementAction(
+        @Header("x-api-key") apiKey: String,
+        @Path("id") promptId: String,
+        @Body action: EngagementRequest
+    ): Response<ActionResponse>
+
+    @POST("api/v1/notifications/token")
+    suspend fun registerFcmToken(
+        @Header("x-api-key") apiKey: String,
+        @Body request: FcmTokenRequest
+    ): Response<BaseResponse>
+}
+
+data class EngagementRequest(
+    val type: String, // "like", "view", "share", "copy"
+    val deviceId: String,
+    val userId: String? = null,
+    val toggle: Boolean = true
+)
+
+data class FcmTokenRequest(
+    val token: String,
+    val deviceId: String,
+    val platform: String = "android",
+    val appVersion: String = "1.0.0"
+)
+```
+
+---
+
+### Flutter (Dart)
+
+```dart
+import 'package:dio/dio.dart';
 
 class PrompterApiClient {
-    private val client = OkHttpClient()
-    private val baseUrl = "http://localhost:3000"
-    private val apiKey = "prompter_live_sec_7f8a9b1c2d3e4f5a"
+  final Dio _dio;
+  final String _apiKey;
 
-    fun getAppConfig(callback: Callback) {
-        val request = Request.Builder()
-            .url("$baseUrl/api/v1/app-config")
-            .addHeader("x-api-key", apiKey)
-            .get()
-            .build()
+  PrompterApiClient({required String baseUrl, required String apiKey})
+      : _apiKey = apiKey,
+        _dio = Dio(BaseOptions(
+          baseUrl: baseUrl,
+          headers: {
+            'x-api-key': apiKey,
+            'Content-Type': 'application/json',
+          },
+        ));
 
-        client.newCall(request).enqueue(callback)
-    }
+  /// Fetch prompts feed
+  Future<Response> getPrompts({
+    int page = 1,
+    int limit = 10,
+    String? category,
+    String sortBy = 'latest',
+    int? seed,
+    required String deviceId,
+  }) async {
+    return await _dio.get('/api/v1/prompts', queryParameters: {
+      'page': page,
+      'limit': limit,
+      if (category != null) 'category': category,
+      'sortBy': sortBy,
+      if (seed != null) 'seed': seed,
+      'deviceId': deviceId,
+    });
+  }
 
-    fun registerView(promptSlug: String, callback: Callback) {
-        val json = """{"type":"view"}"""
-        val body = json.toRequestBody("application/json".toMediaType())
+  /// Toggle like action
+  Future<Response> toggleLike({
+    required String promptId,
+    required String deviceId,
+    String? userId,
+  }) async {
+    return await _dio.post('/api/v1/prompts/$promptId/action', data: {
+      'type': 'like',
+      'deviceId': deviceId,
+      'userId': userId,
+      'toggle': true,
+    });
+  }
 
-        val request = Request.Builder()
-            .url("$baseUrl/api/v1/prompts/$promptSlug/action")
-            .addHeader("x-api-key", apiKey)
-            .post(body)
-            .build()
-
-        client.newCall(request).enqueue(callback)
-    }
+  /// Register FCM device token
+  Future<Response> registerFcmToken({
+    required String token,
+    required String deviceId,
+  }) async {
+    return await _dio.post('/api/v1/notifications/token', data: {
+      'token': token,
+      'deviceId': deviceId,
+      'platform': 'android',
+      'appVersion': '1.0.0',
+    });
+  }
 }
 ```
 
 ---
 
-### iOS (Swift)
-```swift
-import Foundation
+### cURL
 
-class PrompterService {
-    static let shared = PrompterService()
-    private let baseURL = "http://localhost:3000"
-    private let apiKey = "prompter_live_sec_7f8a9b1c2d3e4f5a"
+```bash
+# 1. Fetch App Config
+curl -X GET "https://yourdomain.com/api/v1/app-config" \
+  -H "x-api-key: prompter_live_sec_7f8a9b1c2d3e4f5a"
 
-    func fetchPrompts(page: Int = 1, sortBy: String = "trending") async throws -> [String: Any] {
-        var components = URLComponents(string: "\(baseURL)/api/v1/prompts")!
-        components.queryItems = [
-            URLQueryItem(name: "page", value: "\(page)"),
-            URLQueryItem(name: "sortBy", value: sortBy)
-        ]
+# 2. Get Prompts Feed (Page 1)
+curl -X GET "https://yourdomain.com/api/v1/prompts?page=1&limit=10&sortBy=latest" \
+  -H "x-api-key: prompter_live_sec_7f8a9b1c2d3e4f5a" \
+  -H "x-device-id: android-test-device-uuid"
 
-        var request = URLRequest(url: components.url!)
-        request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
+# 3. Like a Prompt
+curl -X POST "https://yourdomain.com/api/v1/prompts/cyberpunk-neon-samurai/action" \
+  -H "x-api-key: prompter_live_sec_7f8a9b1c2d3e4f5a" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "like",
+    "deviceId": "android-test-device-uuid",
+    "toggle": true
+  }'
 
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw URLError(.badServerResponse)
-        }
-
-        return try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
-    }
-}
+# 4. Register FCM Token
+curl -X POST "https://yourdomain.com/api/v1/notifications/token" \
+  -H "x-api-key: prompter_live_sec_7f8a9b1c2d3e4f5a" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "token": "eXample_FCM_Token_12345",
+    "deviceId": "android-test-device-uuid",
+    "platform": "android",
+    "appVersion": "1.0.0"
+  }'
 ```
-
----
-
-## 7. Support & Administration
-For administrative adjustments such as regenerating API keys, creating categories, configuring ad networks, or sending push notifications, use the **Prompter Admin Panel** at:
-- Web: `http://localhost:3000` (or your deployed admin panel domain)
-- Documentation: Refer to `README.md` for project architecture and seed credentials.
