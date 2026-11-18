@@ -199,7 +199,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, prompt, featuredImage, categoryId, subcategoryId, tags, isPremium, isFeatured, status } = body;
+    const { title, prompt, featuredImage, categoryId, subcategoryId, tags, isPremium, isFeatured, status, views, likes, shares, copies } = body;
 
     if (!title?.trim() || !prompt?.trim() || !categoryId) {
       return NextResponse.json(
@@ -241,6 +241,10 @@ export async function POST(req: NextRequest) {
         isPremium: Boolean(isPremium),
         isFeatured: Boolean(isFeatured),
         status: status !== undefined ? Boolean(status) : true,
+        views: Number(views) || 0,
+        likes: Number(likes) || 0,
+        copies: Number(copies) || 0,
+        shares: Number(shares) || 0,
         createdById: user.id,
       },
       include: {

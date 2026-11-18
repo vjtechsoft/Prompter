@@ -610,7 +610,7 @@ export default function UsersPage() {
                   </th>
                   <th className="py-3 px-4">User</th>
                   <th className="py-3 px-4">Auth</th>
-                  <th className="py-3 px-4">Engagement</th>
+                  <th className="py-3 px-4 min-w-[140px]">Engagement</th>
                   <th className="py-3 px-4">Status</th>
                   <th className="py-3 px-4">Last Active</th>
                   <th className="py-3 px-4">Joined</th>
@@ -740,10 +740,13 @@ export default function UsersPage() {
                         </td>
 
                         {/* Engagement */}
-                        <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-400" title="Prompts Liked">
-                            <Heart className="w-3 h-3 text-rose-500 fill-rose-500/20" />
-                            {item.likesCount}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 shadow-2xs"
+                            title="Total Prompts Liked"
+                          >
+                            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                            <span>{item.likesCount ?? 0} Likes</span>
                           </span>
                         </td>
 

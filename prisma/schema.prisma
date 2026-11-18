@@ -211,6 +211,10 @@ model AppUrls {
   termsOfService     String   @default("https://prompter.io/terms") @db.Text
   refundPolicy       String   @default("https://prompter.io/refund") @db.Text
   dataDeletionPolicy String   @default("https://prompter.io/data-deletion") @db.Text
+  privacyPolicyHtml      String?  @db.LongText
+  termsOfServiceHtml     String?  @db.LongText
+  refundPolicyHtml       String?  @db.LongText
+  dataDeletionPolicyHtml String?  @db.LongText
   contactUs          String   @default("https://prompter.io/contact") @db.Text
   aboutUs            String   @default("https://prompter.io/about") @db.Text
   website            String   @default("https://prompter.io") @db.Text

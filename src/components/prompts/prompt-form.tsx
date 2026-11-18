@@ -46,6 +46,7 @@ export function PromptForm({ initialData, isEdit = false }: PromptFormProps) {
   const [likes, setLikes] = useState(initialData?.likes || 0);
   const [views, setViews] = useState(initialData?.views || 0);
   const [shares, setShares] = useState(initialData?.shares || 0);
+  const [copies, setCopies] = useState(initialData?.copies || 0);
 
   const [categories, setCategories] = useState<CategoryItem[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -186,6 +187,7 @@ export function PromptForm({ initialData, isEdit = false }: PromptFormProps) {
         likes: Number(likes),
         views: Number(views),
         shares: Number(shares),
+        copies: Number(copies),
       };
 
       const url = isEdit ? `/api/prompts/${initialData?.id}` : '/api/prompts';
@@ -331,7 +333,7 @@ export function PromptForm({ initialData, isEdit = false }: PromptFormProps) {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Act as a Principal Engineer. Design an end-to-end..."
-                className="w-full p-4 font-mono text-xs leading-relaxed bg-slate-950 text-slate-100 border border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-y"
+                className="w-full p-4 font-mono text-xs leading-relaxed bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-400 resize-y shadow-inner"
               />
             </div>
           </div>
@@ -461,14 +463,14 @@ export function PromptForm({ initialData, isEdit = false }: PromptFormProps) {
               Upload high-resolution JPG, PNG, or WEBP (max 5MB).
             </p>
 
-            <div className="relative rounded-xl overflow-hidden aspect-video bg-slate-950 border border-slate-800">
+            <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 min-h-[220px] max-h-[420px] flex items-center justify-center p-2">
               <img
                 src={featuredImage}
                 alt="Preview"
-                className="w-full h-full object-cover"
+                className="w-auto h-auto max-w-full max-h-[400px] object-contain rounded-xl shadow-sm"
               />
               {uploading && (
-                <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white text-xs gap-2">
+                <div className="absolute inset-0 bg-black/70 flex items-center justify-center text-white text-xs gap-2 rounded-2xl">
                   <Loader2 className="w-4 h-4 animate-spin text-indigo-400" /> Uploading...
                 </div>
               )}
@@ -498,40 +500,50 @@ export function PromptForm({ initialData, isEdit = false }: PromptFormProps) {
             </div>
           </div>
 
-          {/* Engagement Tuning (Likes, Views, Shares) */}
+          {/* Engagement Tuning (Views, Likes, Copies, Shares) */}
           <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
               Engagement Metrics
             </label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <div>
-                <label className="block text-[10px] text-slate-400 mb-1">Views</label>
+                <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Views</label>
                 <input
                   type="number"
                   min={0}
                   value={views}
                   onChange={(e) => setViews(parseInt(e.target.value) || 0)}
-                  className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium"
                 />
               </div>
               <div>
-                <label className="block text-[10px] text-slate-400 mb-1">Likes</label>
+                <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Likes</label>
                 <input
                   type="number"
                   min={0}
                   value={likes}
                   onChange={(e) => setLikes(parseInt(e.target.value) || 0)}
-                  className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium"
                 />
               </div>
               <div>
-                <label className="block text-[10px] text-slate-400 mb-1">Shares</label>
+                <label className="block text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 mb-1">Copies</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={copies}
+                  onChange={(e) => setCopies(parseInt(e.target.value) || 0)}
+                  className="w-full px-2.5 py-1.5 text-xs bg-indigo-50/50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 rounded-lg text-indigo-900 dark:text-indigo-200 font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Shares</label>
                 <input
                   type="number"
                   min={0}
                   value={shares}
                   onChange={(e) => setShares(parseInt(e.target.value) || 0)}
-                  className="w-full px-2 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white"
+                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium"
                 />
               </div>
             </div>

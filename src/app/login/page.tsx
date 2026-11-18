@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -11,19 +11,59 @@ import {
   AlertCircle,
   Loader2,
   Sparkles,
-  ShieldCheck,
   Eye,
   EyeOff,
-  Crown,
-  Shield,
-  Star,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   Check,
   Zap,
-  TrendingUp,
-  CheckCircle2,
+  Heart,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
+
+const SLIDES = [
+  {
+    id: 1,
+    image: '/uploads/1788597760306-261ab5efb6c3.jpg',
+    title: 'A Royal Folk Dance Portrait',
+    category: 'Cinematic Portraits',
+    engine: 'Midjourney v6.1',
+    prompt: 'Regal Indian dancer in opulent embroidered crimson attire, cinematic atmospheric backlighting, 85mm portrait lens, photorealistic 8K',
+    likes: '14.8k',
+    copies: '3.2k',
+  },
+  {
+    id: 2,
+    image: '/uploads/1788598874149-94b72e09b18b.jpg',
+    title: '3D Cybernetic Character Design',
+    category: '3D Digital Art',
+    engine: 'DALL-E 3 Precision',
+    prompt: 'Hyper-detailed 3D digital sculpture of an android explorer, neon chromatic aberration, volumetric studio rim lighting, octane render',
+    likes: '18.2k',
+    copies: '4.5k',
+  },
+  {
+    id: 3,
+    image: '/uploads/1788699560023-0cfcf09cab5a.jpg',
+    title: 'Dreamy Double Exposure Scrapbook',
+    category: 'Artistic Collages',
+    engine: 'SDXL Turbo',
+    prompt: 'Vintage scrapbook collage aesthetic, dual exposure silhouette over misty pine mountains, warm sepia film grain, mixed media',
+    likes: '11.6k',
+    copies: '2.8k',
+  },
+  {
+    id: 4,
+    image: '/uploads/1788778824061-2b182481e526.jpg',
+    title: 'Festival of Lights Twilight Celebration',
+    category: 'Festivals & Moments',
+    engine: 'Midjourney v6.1',
+    prompt: 'Warm golden diya candlelight reflection, festive celebration portrait, soft bokeh background, photorealistic 8K, cinematic depth',
+    likes: '22.4k',
+    copies: '6.1k',
+  },
+];
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,11 +72,21 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [activeDemo, setActiveDemo] = useState<'super' | 'admin' | null>(null);
+
+  // 4-Slide Image Animation State
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
 
   const router = useRouter();
   const { success, error: toastError } = useToast();
+
+  // Auto-advance slides every 3.5 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,26 +119,13 @@ export default function LoginPage() {
     }
   };
 
-  const fillCredentials = (type: 'super' | 'admin') => {
-    setActiveDemo(type);
-    setError('');
-    if (type === 'super') {
-      setEmail('admin@promptmanager.com');
-      setPassword('Admin@123456');
-    } else {
-      setEmail('sarah.jenkins@promptmanager.com');
-      setPassword('Admin@123456');
-    }
-  };
-
-  const samplePrompt =
-    'Cinematic architectural photograph of a brutalist glass villa floating over misty Scandinavian pine forests, golden hour volumetric illumination, photorealistic 8K, Hasselblad X2D 100C rendering --ar 16:9 --v 6.1 --style raw';
-
-  const copySamplePrompt = () => {
-    navigator.clipboard.writeText(samplePrompt);
+  const copySlidePrompt = (text: string) => {
+    navigator.clipboard.writeText(text);
     setCopiedPrompt(true);
     setTimeout(() => setCopiedPrompt(false), 2000);
   };
+
+  const activeSlide = SLIDES[currentSlide];
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#080B14] text-slate-100 selection:bg-indigo-500 selection:text-white relative overflow-hidden">
@@ -100,8 +137,8 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
       </div>
 
-      {/* Left Column: Interactive Product Showcase */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 relative z-10 flex-col justify-between p-12 xl:p-16 border-r border-slate-800/60 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-950/60 backdrop-blur-sm">
+      {/* Left Column: Interactive Product Showcase & 4-Slide Animation */}
+      <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 relative z-10 flex-col justify-between p-10 xl:p-14 border-r border-slate-800/60 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-950/60 backdrop-blur-sm">
         {/* Brand Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3.5 group">
@@ -124,7 +161,7 @@ export default function LoginPage() {
                   v2.4 Pro
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-medium">Enterprise Prompt Management Engine</p>
+              <p className="text-xs text-slate-400 font-medium">AI Prompt Space</p>
             </div>
           </div>
 
@@ -137,111 +174,136 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Centerpiece: High-Tech Interactive Showcase Card */}
-        <div className="my-auto py-10 max-w-xl space-y-8">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-pink-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold shadow-inner">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-              Next-Gen Prompt Optimization & Distribution
-            </div>
-            <h2 className="text-3xl sm:text-4xl xl:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
-              Curate, Scale & Monetize{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
-                AI Prompts
-              </span>{' '}
-              with Precision.
-            </h2>
-            <p className="text-sm xl:text-base text-slate-400 leading-relaxed font-normal">
-              High-throughput prompt publishing hub equipped with strict Role-Based Access Control, OneSignal push broadcasts, and sub-50ms REST APIs.
-            </p>
+        {/* Centerpiece: Animated Tagline & 4-Slide Image Animation */}
+        <div className="my-auto py-6 max-w-xl w-full space-y-5">
+          {/* Animated Next-Gen Prompt Line */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-pink-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold shadow-inner">
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+            Next-Gen Prompt Optimization &amp; Distribution
           </div>
 
-          {/* Interactive Floating Live Prompt Snippet Card */}
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
-            <div className="relative rounded-2xl bg-slate-900/90 border border-slate-700/60 p-5 shadow-2xl backdrop-blur-xl space-y-4">
-              {/* Card Meta Bar */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-semibold">
-                    <Zap className="w-3 h-3 text-indigo-400" /> Midjourney v6.1
-                  </span>
-                  <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/25 text-[11px] font-medium">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" /> Featured
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={copySamplePrompt}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white border border-slate-700 transition-colors"
-                  title="Copy Prompt"
+          {/* 4-Slide Animated Visual Showcase Frame */}
+          <div className="relative rounded-3xl overflow-hidden border border-slate-800/90 bg-slate-950/80 shadow-2xl group">
+            {/* Background Glow */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-lg opacity-40 group-hover:opacity-70 transition duration-700 pointer-events-none" />
+
+            {/* Slides Container */}
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
+              {SLIDES.map((slide, idx) => (
+                <div
+                  key={slide.id}
+                  className={`absolute inset-0 transition-all duration-700 ease-out transform ${
+                    idx === currentSlide
+                      ? 'opacity-100 scale-100 z-10 pointer-events-auto'
+                      : 'opacity-0 scale-105 z-0 pointer-events-none'
+                  }`}
                 >
-                  {copiedPrompt ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-slate-400" />
-                      <span>Copy Prompt</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Code Snippet Box */}
-              <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/90 font-mono text-xs text-slate-300 leading-relaxed relative">
-                <span className="text-indigo-400 select-none">$ </span>
-                {samplePrompt}
-              </div>
-
-              {/* Engagement Stat Strip */}
-              <div className="flex items-center justify-between pt-1 text-xs text-slate-400">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5 font-medium text-slate-300">
-                    <span className="w-2 h-2 rounded-full bg-rose-500" />
-                    14.8k Likes
-                  </span>
-                  <span className="flex items-center gap-1.5 font-medium text-slate-300">
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                    92.4k Views
-                  </span>
-                  <span className="hidden sm:inline-flex items-center gap-1 text-purple-300 font-medium">
-                    <Crown className="w-3 h-3 text-amber-400" /> VIP Access
-                  </span>
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                 </div>
-                <div className="text-[11px] text-slate-500 font-mono">ID: pr_8f93a</div>
+              ))}
+
+              {/* Slide Navigation Arrows */}
+              <button
+                type="button"
+                onClick={() => setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-slate-950/60 hover:bg-slate-900 border border-white/10 text-white flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Previous Slide"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrentSlide((prev) => (prev + 1) % SLIDES.length)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-slate-950/60 hover:bg-slate-900 border border-white/10 text-white flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label="Next Slide"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+
+              {/* Floating Slide Details Glass Card */}
+              <div className="absolute bottom-3 left-3 right-3 z-20 p-4 rounded-2xl bg-slate-900/85 border border-slate-700/60 backdrop-blur-xl shadow-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold uppercase tracking-wider">
+                      <Zap className="w-3 h-3 text-indigo-400" />
+                      {activeSlide.engine}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-400">
+                      {activeSlide.category}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs text-slate-300">
+                    <span className="flex items-center gap-1 text-[11px] font-medium text-rose-400">
+                      <Heart className="w-3 h-3 fill-rose-500" />
+                      {activeSlide.likes}
+                    </span>
+                    <span className="text-[11px] font-medium text-indigo-300">
+                      📋 {activeSlide.copies}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <p className="text-xs text-slate-300 font-mono line-clamp-1 flex-1">
+                    <span className="text-indigo-400">$ </span>
+                    {activeSlide.prompt}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => copySlidePrompt(activeSlide.prompt)}
+                    className="shrink-0 flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow"
+                  >
+                    {copiedPrompt ? (
+                      <>
+                        <Check className="w-3 h-3 text-white" />
+                        <span>Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Micro Value Metric Grid */}
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-800/70">
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/60 backdrop-blur-sm">
-              <div className="text-xl xl:text-2xl font-bold text-white tracking-tight">99.98%</div>
-              <div className="text-[11px] text-slate-400 font-medium mt-0.5">High-Availability SLA</div>
-            </div>
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/60 backdrop-blur-sm">
-              <div className="text-xl xl:text-2xl font-bold text-indigo-400 tracking-tight">&lt; 35ms</div>
-              <div className="text-[11px] text-slate-400 font-medium mt-0.5">Edge Route Response</div>
-            </div>
-            <div className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/60 backdrop-blur-sm">
-              <div className="text-xl xl:text-2xl font-bold text-purple-400 tracking-tight">RBAC 2.0</div>
-              <div className="text-[11px] text-slate-400 font-medium mt-0.5">Multi-Admin Enforced</div>
+            {/* Slide Progress / Indicators Bar */}
+            <div className="p-3 bg-slate-950 flex items-center justify-between border-t border-slate-800/80">
+              <div className="flex items-center gap-2">
+                {SLIDES.map((slide, idx) => (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => setCurrentSlide(idx)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      idx === currentSlide
+                        ? 'w-7 bg-gradient-to-r from-indigo-500 to-purple-500'
+                        : 'w-2 bg-slate-700 hover:bg-slate-600'
+                    }`}
+                    aria-label={`Slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
+                Slide {currentSlide + 1} of {SLIDES.length}
+              </span>
             </div>
           </div>
         </div>
 
         {/* Footer info */}
-        <div className="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-800/40">
-          <span>© 2026 Prompter Cloud Architecture</span>
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-              SQLite ACID Verified
-            </span>
-          </div>
+        <div className="flex flex-col text-xs text-slate-500 pt-4 border-t border-slate-800/40">
+          <span className="font-medium text-slate-400">© 2026 Prompter AI. All Rights Reserved.</span>
+          <span className="text-[11px] text-slate-500 mt-0.5">Created by Codemorio Infotech Pvt. Ltd.</span>
         </div>
       </div>
 
@@ -256,7 +318,7 @@ export default function LoginPage() {
               </div>
             </div>
             <h1 className="text-2xl font-extrabold text-white tracking-tight">Prompter</h1>
-            <p className="text-xs text-indigo-300 font-medium mt-0.5">Admin Management Portal</p>
+            <p className="text-xs text-indigo-300 font-medium mt-0.5">AI Prompt Space</p>
           </div>
 
           {/* Elevated Glass Card */}
@@ -271,64 +333,11 @@ export default function LoginPage() {
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-sans">
                     Welcome Back
                   </h2>
-                  <span className="inline-block animate-wave select-none text-xl">👋</span>
+                  <span className="inline-block select-none text-xl">👋</span>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-400">
                   Authenticate to access the administrative dashboard.
                 </p>
-              </div>
-
-              {/* Quick Demo Account Selector Cards */}
-              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold tracking-wide text-slate-400 uppercase flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                    Quick Demo Credentials
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-medium">1-Click Fill</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Super Admin Pill */}
-                  <button
-                    type="button"
-                    onClick={() => fillCredentials('super')}
-                    className={`group relative text-left p-2.5 rounded-xl border transition-all duration-200 ${
-                      activeDemo === 'super'
-                        ? 'bg-amber-950/40 border-amber-500/60 ring-2 ring-amber-500/30 shadow-md shadow-amber-900/20'
-                        : 'bg-slate-900/80 border-slate-800 hover:border-amber-500/40 hover:bg-slate-900'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-300">
-                        <Crown className="w-3.5 h-3.5 text-amber-400" />
-                        Super Admin
-                      </span>
-                      {activeDemo === 'super' && <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />}
-                    </div>
-                    <p className="text-[10px] text-slate-400 truncate mt-1">Alex Vance</p>
-                  </button>
-
-                  {/* Admin Pill */}
-                  <button
-                    type="button"
-                    onClick={() => fillCredentials('admin')}
-                    className={`group relative text-left p-2.5 rounded-xl border transition-all duration-200 ${
-                      activeDemo === 'admin'
-                        ? 'bg-indigo-950/40 border-indigo-500/60 ring-2 ring-indigo-500/30 shadow-md shadow-indigo-900/20'
-                        : 'bg-slate-900/80 border-slate-800 hover:border-indigo-500/40 hover:bg-slate-900'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-xs font-semibold text-indigo-300">
-                        <Shield className="w-3.5 h-3.5 text-indigo-400" />
-                        Staff Admin
-                      </span>
-                      {activeDemo === 'admin' && <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />}
-                    </div>
-                    <p className="text-[10px] text-slate-400 truncate mt-1">Sarah Jenkins</p>
-                  </button>
-                </div>
               </div>
 
               {/* Error Alert Box */}
@@ -353,7 +362,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="admin@promptmanager.com"
+                      placeholder="admin@prompter.io"
                       className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 hover:border-slate-700 transition-all duration-200"
                     />
                   </div>
@@ -446,8 +455,6 @@ export default function LoginPage() {
             <Link href="/client-apis" className="hover:text-indigo-400 transition-colors">
               Developer APIs
             </Link>
-            <span>•</span>
-            <span className="text-slate-600">SQLite Single Node</span>
           </div>
         </div>
       </div>

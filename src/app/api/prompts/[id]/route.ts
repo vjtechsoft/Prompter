@@ -60,7 +60,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const { id } = params;
     const body = await req.json();
-    const { title, prompt, featuredImage, categoryId, subcategoryId, tags, isPremium, isFeatured, status, likes, views, shares } = body;
+    const { title, prompt, featuredImage, categoryId, subcategoryId, tags, isPremium, isFeatured, status, likes, views, shares, copies } = body;
 
     const existing = await prisma.prompt.findUnique({ where: { id } });
     if (!existing) {
@@ -107,6 +107,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         likes: likes !== undefined ? parseInt(likes) : existing.likes,
         views: views !== undefined ? parseInt(views) : existing.views,
         shares: shares !== undefined ? parseInt(shares) : existing.shares,
+        copies: copies !== undefined ? parseInt(copies) : existing.copies,
       },
       include: {
         category: true,

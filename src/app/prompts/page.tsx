@@ -702,10 +702,11 @@ export default function PromptsPage() {
 
                       {/* Engagement */}
                       <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-3 text-[11px] text-slate-500">
-                          <span title="Views">👁 {formatCompactNumber(prompt.views)}</span>
-                          <span title="Likes">❤️ {formatCompactNumber(prompt.likes)}</span>
-                          <span title="Shares">🔗 {formatCompactNumber(prompt.shares)}</span>
+                        <div className="flex items-center justify-center gap-2.5 text-[11px] text-slate-500 whitespace-nowrap">
+                          <span title="Views">👁 {formatCompactNumber(prompt.views || 0)}</span>
+                          <span title="Likes">❤️ {formatCompactNumber(prompt.likes || 0)}</span>
+                          <span title="Copies" className="text-indigo-600 dark:text-indigo-400 font-medium">📋 {formatCompactNumber(prompt.copies || 0)}</span>
+                          <span title="Shares">🔗 {formatCompactNumber(prompt.shares || 0)}</span>
                         </div>
                       </td>
 
@@ -823,11 +824,11 @@ export default function PromptsPage() {
         >
           {previewPrompt && (
             <div className="space-y-4">
-              <div className="relative rounded-xl overflow-hidden aspect-video max-h-56 bg-slate-950">
+              <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 min-h-[220px] max-h-[420px] flex items-center justify-center p-2">
                 <img
                   src={previewPrompt.featuredImage}
                   alt={previewPrompt.title}
-                  className="w-full h-full object-cover"
+                  className="w-auto h-auto max-w-full max-h-[400px] object-contain rounded-xl shadow-sm"
                 />
                 <div className="absolute top-3 right-3 flex items-center gap-2">
                   {previewPrompt.isPremium && (
@@ -846,22 +847,26 @@ export default function PromptsPage() {
               </div>
 
               {/* Stats badges */}
-              <div className="flex flex-wrap items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs">
+              <div className="flex flex-wrap items-center gap-4 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 text-xs">
                 <div>
                   <span className="text-slate-400">Views:</span>{' '}
-                  <strong className="text-slate-900 dark:text-white">{previewPrompt.views}</strong>
+                  <strong className="text-slate-900 dark:text-white">{previewPrompt.views || 0}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400">Likes:</span>{' '}
-                  <strong className="text-slate-900 dark:text-white">{previewPrompt.likes}</strong>
+                  <strong className="text-slate-900 dark:text-white">{previewPrompt.likes || 0}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400">Copies:</span>{' '}
+                  <strong className="text-indigo-600 dark:text-indigo-400">{previewPrompt.copies || 0}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400">Shares:</span>{' '}
-                  <strong className="text-slate-900 dark:text-white">{previewPrompt.shares}</strong>
+                  <strong className="text-slate-900 dark:text-white">{previewPrompt.shares || 0}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400">Trending Score:</span>{' '}
-                  <strong className="text-orange-500">{previewPrompt.trendingScore}</strong>
+                  <strong className="text-orange-500">{previewPrompt.trendingScore || 0}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400">Characters:</span>{' '}
@@ -884,7 +889,7 @@ export default function PromptsPage() {
                   </button>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 font-mono text-xs whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto select-all">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-mono text-xs whitespace-pre-wrap leading-relaxed max-h-64 overflow-y-auto select-all shadow-inner">
                   {previewPrompt.prompt}
                 </div>
               </div>
