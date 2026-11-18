@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -13,57 +13,57 @@ import {
   Sparkles,
   Eye,
   EyeOff,
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  Check,
-  Zap,
-  Heart,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
-const SLIDES = [
-  {
-    id: 1,
-    image: '/uploads/1788597760306-261ab5efb6c3.jpg',
-    title: 'A Royal Folk Dance Portrait',
-    category: 'Cinematic Portraits',
-    engine: 'Midjourney v6.1',
-    prompt: 'Regal Indian dancer in opulent embroidered crimson attire, cinematic atmospheric backlighting, 85mm portrait lens, photorealistic 8K',
-    likes: '14.8k',
-    copies: '3.2k',
-  },
-  {
-    id: 2,
-    image: '/uploads/1788598874149-94b72e09b18b.jpg',
-    title: '3D Cybernetic Character Design',
-    category: '3D Digital Art',
-    engine: 'DALL-E 3 Precision',
-    prompt: 'Hyper-detailed 3D digital sculpture of an android explorer, neon chromatic aberration, volumetric studio rim lighting, octane render',
-    likes: '18.2k',
-    copies: '4.5k',
-  },
-  {
-    id: 3,
-    image: '/uploads/1788699560023-0cfcf09cab5a.jpg',
-    title: 'Dreamy Double Exposure Scrapbook',
-    category: 'Artistic Collages',
-    engine: 'SDXL Turbo',
-    prompt: 'Vintage scrapbook collage aesthetic, dual exposure silhouette over misty pine mountains, warm sepia film grain, mixed media',
-    likes: '11.6k',
-    copies: '2.8k',
-  },
-  {
-    id: 4,
-    image: '/uploads/1788778824061-2b182481e526.jpg',
-    title: 'Festival of Lights Twilight Celebration',
-    category: 'Festivals & Moments',
-    engine: 'Midjourney v6.1',
-    prompt: 'Warm golden diya candlelight reflection, festive celebration portrait, soft bokeh background, photorealistic 8K, cinematic depth',
-    likes: '22.4k',
-    copies: '6.1k',
-  },
+interface ShowcaseCard {
+  tag: string;
+  image: string;
+}
+
+const COLUMN_1: ShowcaseCard[] = [
+  { tag: 'SPIRITUAL', image: '/images/prompts/group-portrait-1.webp' },
+  { tag: 'FASHION', image: '/images/prompts/couple-portrait-2.webp' },
+  { tag: 'CELEBRATION', image: '/uploads/1788778824061-2b182481e526.jpg' },
+  { tag: 'MYTHOLOGY', image: '/uploads/1788700421150-739bb7979eee.jpg' },
+  { tag: 'RETRO', image: '/images/prompts/photo-collage-1.webp' },
 ];
+
+const COLUMN_2: ShowcaseCard[] = [
+  { tag: 'PORTRAIT', image: '/images/prompts/solo-portrait-1.webp' },
+  { tag: 'POSTER', image: '/images/prompts/poster-typography-1.webp' },
+  { tag: 'CINEMATIC', image: '/images/prompts/solo-portrait-2.webp' },
+  { tag: 'ROYAL', image: '/uploads/1788597760306-261ab5efb6c3.jpg' },
+  { tag: 'ACTION', image: '/images/prompts/fan-cdp-2.webp' },
+];
+
+const COLUMN_3: ShowcaseCard[] = [
+  { tag: 'ARTWORK', image: '/images/prompts/stylized-illustration-1.webp' },
+  { tag: 'KIDS', image: '/images/prompts/scrapbook-page-1.webp' },
+  { tag: '3D ART', image: '/uploads/1788598874149-94b72e09b18b.jpg' },
+  { tag: 'WALLPAPER', image: '/images/prompts/wallpaper-1.webp' },
+  { tag: 'DOUBLE EXPOSURE', image: '/images/prompts/double-exposure-1.webp' },
+];
+
+function ShowcaseCardItem({ card }: { card: ShowcaseCard }) {
+  return (
+    <div className="group relative w-[135px] sm:w-[155px] md:w-[170px] xl:w-[195px] h-[190px] sm:h-[220px] md:h-[245px] xl:h-[275px] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/10 ring-1 ring-white/5 bg-slate-900 shadow-2xl shadow-black/80 shrink-0 transition-transform duration-300 hover:scale-[1.03]">
+      <img
+        src={card.image}
+        alt={card.tag}
+        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 select-none"
+        loading="lazy"
+      />
+      {/* Subtle bottom shadow vignette */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
+
+      {/* Glassmorphic Category Tag (identical to reference image) */}
+      <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white font-bold text-[10px] tracking-wider uppercase shadow-lg select-none">
+        {card.tag}
+      </div>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -73,20 +73,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 4-Slide Image Animation State
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [copiedPrompt, setCopiedPrompt] = useState(false);
-
   const router = useRouter();
   const { success, error: toastError } = useToast();
-
-  // Auto-advance slides every 3.5 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % SLIDES.length);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,14 +107,6 @@ export default function LoginPage() {
     }
   };
 
-  const copySlidePrompt = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedPrompt(true);
-    setTimeout(() => setCopiedPrompt(false), 2000);
-  };
-
-  const activeSlide = SLIDES[currentSlide];
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#080B14] text-slate-100 selection:bg-indigo-500 selection:text-white relative overflow-hidden">
       {/* Background Ambient Mesh & Glows */}
@@ -137,10 +117,10 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25" />
       </div>
 
-      {/* Left Column: Interactive Product Showcase & 4-Slide Animation */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 relative z-10 flex-col justify-between p-10 xl:p-14 border-r border-slate-800/60 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-950/60 backdrop-blur-sm">
+      {/* Left Column: Tilted Visual Showcase Mosaic matching the Reference Image */}
+      <div className="hidden lg:flex lg:w-1/2 xl:w-7/12 relative z-10 flex-col justify-between p-8 xl:p-12 border-r border-slate-800/60 bg-gradient-to-b from-slate-900/40 via-transparent to-slate-950/60 backdrop-blur-sm overflow-hidden">
         {/* Brand Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between z-20 shrink-0">
           <div className="flex items-center gap-3.5 group">
             <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700 p-0.5 shadow-lg shadow-indigo-500/25 ring-1 ring-white/20 group-hover:scale-105 transition-transform duration-300">
               <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center overflow-hidden p-2">
@@ -174,134 +154,52 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Centerpiece: Animated Tagline & 4-Slide Image Animation */}
-        <div className="my-auto py-6 max-w-xl w-full space-y-5">
-          {/* Animated Next-Gen Prompt Line */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-pink-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-semibold shadow-inner">
+        {/* Centerpiece Showcase: Tilted 3-Column Card Mosaic */}
+        <div className="relative flex-1 my-5 min-h-[460px] max-h-[640px] rounded-3xl overflow-hidden border border-slate-800/80 bg-slate-950/90 shadow-2xl flex items-center justify-center">
+          {/* Ambient Glow */}
+          <div className="absolute -inset-10 bg-gradient-to-tr from-indigo-600/15 via-purple-600/10 to-pink-600/15 blur-3xl opacity-50 pointer-events-none" />
+
+          {/* Top Tagline Pill */}
+          <div className="absolute top-4 left-4 z-20 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/80 backdrop-blur-md border border-indigo-500/30 text-indigo-300 text-xs font-semibold shadow-xl">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-            Next-Gen Prompt Optimization &amp; Distribution
+            Next-Gen Prompt Space &amp; Curation
           </div>
 
-          {/* 4-Slide Animated Visual Showcase Frame */}
-          <div className="relative rounded-3xl overflow-hidden border border-slate-800/90 bg-slate-950/80 shadow-2xl group">
-            {/* Background Glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-lg opacity-40 group-hover:opacity-70 transition duration-700 pointer-events-none" />
-
-            {/* Slides Container */}
-            <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-950">
-              {SLIDES.map((slide, idx) => (
-                <div
-                  key={slide.id}
-                  className={`absolute inset-0 transition-all duration-700 ease-out transform ${
-                    idx === currentSlide
-                      ? 'opacity-100 scale-100 z-10 pointer-events-auto'
-                      : 'opacity-0 scale-105 z-0 pointer-events-none'
-                  }`}
-                >
-                  <img
-                    src={slide.image}
-                    alt={slide.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-                </div>
-              ))}
-
-              {/* Slide Navigation Arrows */}
-              <button
-                type="button"
-                onClick={() => setCurrentSlide((prev) => (prev - 1 + SLIDES.length) % SLIDES.length)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-slate-950/60 hover:bg-slate-900 border border-white/10 text-white flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Previous Slide"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrentSlide((prev) => (prev + 1) % SLIDES.length)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-slate-950/60 hover:bg-slate-900 border border-white/10 text-white flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Next Slide"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-
-              {/* Floating Slide Details Glass Card */}
-              <div className="absolute bottom-3 left-3 right-3 z-20 p-4 rounded-2xl bg-slate-900/85 border border-slate-700/60 backdrop-blur-xl shadow-xl space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-bold uppercase tracking-wider">
-                      <Zap className="w-3 h-3 text-indigo-400" />
-                      {activeSlide.engine}
-                    </span>
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      {activeSlide.category}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-3 text-xs text-slate-300">
-                    <span className="flex items-center gap-1 text-[11px] font-medium text-rose-400">
-                      <Heart className="w-3 h-3 fill-rose-500" />
-                      {activeSlide.likes}
-                    </span>
-                    <span className="text-[11px] font-medium text-indigo-300">
-                      📋 {activeSlide.copies}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 pt-1">
-                  <p className="text-xs text-slate-300 font-mono line-clamp-1 flex-1">
-                    <span className="text-indigo-400">$ </span>
-                    {activeSlide.prompt}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => copySlidePrompt(activeSlide.prompt)}
-                    className="shrink-0 flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow"
-                  >
-                    {copiedPrompt ? (
-                      <>
-                        <Check className="w-3 h-3 text-white" />
-                        <span>Copied</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3 h-3" />
-                        <span>Copy</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Slide Progress / Indicators Bar */}
-            <div className="p-3 bg-slate-950 flex items-center justify-between border-t border-slate-800/80">
-              <div className="flex items-center gap-2">
-                {SLIDES.map((slide, idx) => (
-                  <button
-                    key={slide.id}
-                    type="button"
-                    onClick={() => setCurrentSlide(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      idx === currentSlide
-                        ? 'w-7 bg-gradient-to-r from-indigo-500 to-purple-500'
-                        : 'w-2 bg-slate-700 hover:bg-slate-600'
-                    }`}
-                    aria-label={`Slide ${idx + 1}`}
-                  />
+          {/* Tilted Columns Showcase */}
+          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+            <div className="flex gap-4 sm:gap-5 transform rotate-[12deg] scale-[1.12] xl:scale-[1.18] pointer-events-auto select-none">
+              {/* Column 1: Moves upward */}
+              <div className="flex flex-col gap-4 sm:gap-5 animate-marquee-col-up hover:[animation-play-state:paused]">
+                {[...COLUMN_1, ...COLUMN_1].map((card, i) => (
+                  <ShowcaseCardItem key={`c1-${i}`} card={card} />
                 ))}
               </div>
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-                Slide {currentSlide + 1} of {SLIDES.length}
-              </span>
+
+              {/* Column 2: Moves downward */}
+              <div className="flex flex-col gap-4 sm:gap-5 animate-marquee-col-down hover:[animation-play-state:paused]">
+                {[...COLUMN_2, ...COLUMN_2].map((card, i) => (
+                  <ShowcaseCardItem key={`c2-${i}`} card={card} />
+                ))}
+              </div>
+
+              {/* Column 3: Moves upward */}
+              <div className="flex flex-col gap-4 sm:gap-5 animate-marquee-col-up-fast hover:[animation-play-state:paused]">
+                {[...COLUMN_3, ...COLUMN_3].map((card, i) => (
+                  <ShowcaseCardItem key={`c3-${i}`} card={card} />
+                ))}
+              </div>
             </div>
+
+            {/* Edge Vignette Masks for Seamless Gradient Melt */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#080B14] via-[#080B14]/80 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#080B14] via-[#080B14]/80 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#080B14] via-[#080B14]/70 to-transparent z-10" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#080B14] via-[#080B14]/70 to-transparent z-10" />
           </div>
         </div>
 
-        {/* Footer info */}
-        <div className="flex flex-col text-xs text-slate-500 pt-4 border-t border-slate-800/40">
+        {/* Footer Info */}
+        <div className="flex flex-col text-xs text-slate-500 pt-3 border-t border-slate-800/40 shrink-0">
           <span className="font-medium text-slate-400">© 2026 Prompter AI. All Rights Reserved.</span>
           <span className="text-[11px] text-slate-500 mt-0.5">Created by Codemorio Infotech Pvt. Ltd.</span>
         </div>
@@ -348,70 +246,76 @@ export default function LoginPage() {
                 </div>
               )}
 
-              {/* Login Form */}
+              {/* Form */}
               <form onSubmit={handleLogin} className="space-y-4">
-                {/* Email Field */}
+                {/* Email Input */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-medium text-slate-300">
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
                     Email Address
                   </label>
-                  <div className="relative group">
-                    <Mail className="w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none" />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                      <Mail className="w-4 h-4" />
+                    </div>
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="admin@prompter.io"
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 hover:border-slate-700 transition-all duration-200"
+                      placeholder="admin@prompter.com"
+                      autoComplete="email"
+                      className="w-full pl-10 pr-4 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
 
-                {/* Password Field with Show/Hide Toggle */}
+                {/* Password Input */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-medium text-slate-300">Password</label>
+                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Password
+                    </label>
                     <Link
                       href="/forgot-password"
-                      className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+                      className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
                     >
                       Forgot password?
                     </Link>
                   </div>
-                  <div className="relative group">
-                    <Lock className="w-4 h-4 text-slate-500 group-focus-within:text-indigo-400 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none" />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                      <Lock className="w-4 h-4" />
+                    </div>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••••••"
-                      className="w-full pl-10 pr-11 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 hover:border-slate-700 transition-all duration-200 font-mono tracking-wider placeholder:tracking-normal placeholder:font-sans"
+                      autoComplete="current-password"
+                      className="w-full pl-10 pr-11 py-3 bg-slate-950/70 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors p-0.5 rounded focus:outline-none"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                {/* Remember Me Toggle */}
+                {/* Remember Me */}
                 <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0 bg-slate-950 cursor-pointer"
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-indigo-500/50"
                     />
-                    <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
-                      Remember this browser (30 days)
-                    </span>
+                    <span className="text-xs text-slate-400">Remember this device for 30 days</span>
                   </label>
                 </div>
 
@@ -419,42 +323,31 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full relative group overflow-hidden rounded-xl p-[1px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 transition-all duration-200 active:scale-[0.99]"
+                  className="w-full relative group overflow-hidden rounded-xl p-px font-semibold text-sm shadow-xl shadow-indigo-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-indigo-500/35"
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 rounded-xl" />
-                  <span className="relative flex items-center justify-center gap-2 py-3 px-4 rounded-[11px] bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 group-hover:from-indigo-500 group-hover:to-purple-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/30 transition-all duration-200">
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl transition-all duration-300 group-hover:scale-105" />
+                  <div className="relative px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-[11px] flex items-center justify-center gap-2 text-white group-hover:bg-opacity-90 transition-all">
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin text-white" />
-                        <span>Verifying Credentials...</span>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Signing in securely...</span>
                       </>
                     ) : (
                       <>
-                        <span>Sign In to Workspace</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+                        <span>Sign In to Prompter</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                       </>
                     )}
-                  </span>
+                  </div>
                 </button>
               </form>
-
-              {/* Security Badge Footer */}
-              <div className="pt-4 border-t border-slate-800/80 text-center">
-                <div className="inline-flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
-                  <Lock className="w-3 h-3 text-slate-500" />
-                  <span>256-bit SSL Encrypted • Role-Protected Session Gate</span>
-                </div>
-              </div>
             </div>
           </div>
 
-          {/* Quick Help Links */}
-          <div className="mt-6 text-center text-xs text-slate-500 space-x-3">
-            <span>Prompter System v2.4</span>
-            <span>•</span>
-            <Link href="/client-apis" className="hover:text-indigo-400 transition-colors">
-              Developer APIs
-            </Link>
+          {/* Mobile Footer */}
+          <div className="text-center text-xs text-slate-500 mt-8 space-y-1 lg:hidden">
+            <p className="font-medium text-slate-400">© 2026 Prompter AI. All Rights Reserved.</p>
+            <p className="text-[11px] text-slate-500">Created by Codemorio Infotech Pvt. Ltd.</p>
           </div>
         </div>
       </div>

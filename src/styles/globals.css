@@ -91,3 +91,38 @@ body {
 pre code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
+
+/* Vertical marquee animations for tilted card showcase */
+@keyframes marquee-col-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes marquee-col-down {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-marquee-col-up {
+  animation: marquee-col-up 34s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-col-down {
+  animation: marquee-col-down 38s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-col-up-fast {
+  animation: marquee-col-up 28s linear infinite;
+  will-change: transform;
+}
+

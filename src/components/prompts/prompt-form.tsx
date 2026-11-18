@@ -527,13 +527,13 @@ export function PromptForm({ initialData, isEdit = false }: PromptFormProps) {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 mb-1">Copies</label>
+                <label className="block text-[10px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Copies</label>
                 <input
                   type="number"
                   min={0}
                   value={copies}
                   onChange={(e) => setCopies(parseInt(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 text-xs bg-indigo-50/50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 rounded-lg text-indigo-900 dark:text-indigo-200 font-semibold"
+                  className="w-full px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white font-medium"
                 />
               </div>
               <div>

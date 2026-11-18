@@ -1,0 +1,54 @@
+
+<svg width="800" height="960" viewBox="0 0 800 960" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="phoneG" x1="0" y1="0" x2="800" y2="960" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#24211C" />
+      <stop offset="100%" stop-color="#141310" />
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0D27A" />
+      <stop offset="100%" stop-color="#E8C15F" />
+    </linearGradient>
+  </defs>
+
+  <!-- Phone Bezel / Frame -->
+  <rect x="180" y="60" width="440" height="840" rx="48" fill="#0E0D0B" stroke="#3A352C" stroke-width="12" />
+  
+  <!-- Screen Area -->
+  <rect x="194" y="74" width="412" height="812" rx="38" fill="#181613" />
+
+  <!-- Dynamic Island / Speaker Pill -->
+  <rect x="330" y="90" width="140" height="28" rx="14" fill="#000000" />
+  
+  <!-- In-app UI: Header -->
+  <g transform="translate(220, 140)">
+    <rect width="36" height="36" rx="10" fill="url(#goldAccent)" />
+    <text x="50" y="24" fill="#FFFFFF" font-family="system-ui" font-size="18" font-weight="700">Prompter</text>
+    <circle cx="330" cy="18" r="16" fill="#2A261F" />
+  </g>
+
+  <!-- In-app UI: Featured Card -->
+  <g transform="translate(220, 200)">
+    <rect width="360" height="420" rx="24" fill="#26221B" stroke="#423A2B" stroke-width="1.5" />
+    <!-- Image placeholder inside card -->
+    <rect x="12" y="12" width="336" height="260" rx="16" fill="#3D3425" />
+    <circle cx="180" cy="142" r="40" fill="url(#goldAccent)" opacity="0.3" />
+    <path d="M180 120 L185 137 L202 142 L185 147 L180 164 L175 147 L158 142 L175 137 Z" fill="#E8C15F" />
+
+    <!-- Prompt title and copy CTA -->
+    <text x="20" y="305" fill="#F4F2EC" font-family="'Fraunces', Georgia" font-size="19" font-weight="700">Chiaroscuro Character Study</text>
+    <text x="20" y="330" fill="#A8A293" font-family="system-ui" font-size="12">Solo Portrait • 85mm Prime Lens • Studio</text>
+    
+    <!-- One-Tap Copy Button -->
+    <rect x="20" y="355" width="320" height="46" rx="14" fill="url(#goldAccent)" />
+    <text x="180" y="384" fill="#0B0B0F" font-family="system-ui" font-size="14" font-weight="700" text-anchor="middle">Tap to Copy Prompt</text>
+  </g>
+
+  <!-- In-app UI: Bottom Nav -->
+  <g transform="translate(220, 810)">
+    <rect width="360" height="54" rx="20" fill="#1F1B15" />
+    <circle cx="60" cy="27" r="12" fill="#E8C15F" />
+    <circle cx="180" cy="27" r="10" fill="#6B6252" />
+    <circle cx="300" cy="27" r="10" fill="#6B6252" />
+  </g>
+</svg>

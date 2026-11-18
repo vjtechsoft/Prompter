@@ -702,10 +702,10 @@ export default function PromptsPage() {
 
                       {/* Engagement */}
                       <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-2.5 text-[11px] text-slate-500 whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2.5 text-[11px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
                           <span title="Views">👁 {formatCompactNumber(prompt.views || 0)}</span>
                           <span title="Likes">❤️ {formatCompactNumber(prompt.likes || 0)}</span>
-                          <span title="Copies" className="text-indigo-600 dark:text-indigo-400 font-medium">📋 {formatCompactNumber(prompt.copies || 0)}</span>
+                          <span title="Copies">📋 {formatCompactNumber(prompt.copies || 0)}</span>
                           <span title="Shares">🔗 {formatCompactNumber(prompt.shares || 0)}</span>
                         </div>
                       </td>
@@ -858,7 +858,7 @@ export default function PromptsPage() {
                 </div>
                 <div>
                   <span className="text-slate-400">Copies:</span>{' '}
-                  <strong className="text-indigo-600 dark:text-indigo-400">{previewPrompt.copies || 0}</strong>
+                  <strong className="text-slate-900 dark:text-white">{previewPrompt.copies || 0}</strong>
                 </div>
                 <div>
                   <span className="text-slate-400">Shares:</span>{' '}
