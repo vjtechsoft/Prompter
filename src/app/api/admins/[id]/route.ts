@@ -5,7 +5,7 @@ import { logActivity } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser(req);
     if (!user) {
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Forbidden: Only Super Admin can view admin details' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const admin = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser(req);
     if (!user) {
@@ -61,7 +61,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Forbidden: Only Super Admin can update admin accounts' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { name, email, password, avatar, status, role } = body;
 
@@ -130,7 +130,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser(req);
     if (!user) {
@@ -141,7 +141,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Forbidden: Only Super Admin can delete admin accounts' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const target = await prisma.user.findUnique({ where: { id } });
 
     if (!target) {

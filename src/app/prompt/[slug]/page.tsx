@@ -6,8 +6,8 @@ import DeepLinkClient from './deep-link-client';
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  params: { slug: string };
-  searchParams?: { [key: string]: string | string[] | undefined };
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 async function getPromptData(slug: string) {
@@ -39,7 +39,8 @@ async function getPromptData(slug: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const data = await getPromptData(params.slug);
+  const { slug } = await params;
+  const data = await getPromptData(slug);
   if (!data) {
     return {
       title: 'Prompt Not Found',
@@ -90,7 +91,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PromptDeepLinkPage({ params, searchParams }: Props) {
-  const data = await getPromptData(params.slug);
+  const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const data = await getPromptData(slug);
   if (!data) {
     notFound();
   }
@@ -132,7 +135,7 @@ export default async function PromptDeepLinkPage({ params, searchParams }: Props
         playStoreUrl,
         appLogo,
       }}
-      initialNoRedirect={searchParams?.noredirect === '1' || searchParams?.preview === '1'}
+      initialNoRedirect={resolvedSearchParams?.noredirect === '1' || resolvedSearchParams?.preview === '1'}
     />
   );
 }

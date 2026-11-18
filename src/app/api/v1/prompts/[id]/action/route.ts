@@ -6,14 +6,14 @@ import { invalidateTrendingCache } from '@/lib/trending';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await validateClientApiKey(req);
     if (!auth.valid) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json().catch(() => ({}));
     const { type, userId, deviceId, toggle } = body;
 

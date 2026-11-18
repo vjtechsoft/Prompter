@@ -6,7 +6,7 @@ import { sendFcmNotification } from '@/lib/fcm';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser(req);
     if (!user) {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Forbidden: Only Super Admin can send notifications' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const notification = await prisma.notification.findUnique({
       where: { id },
     });

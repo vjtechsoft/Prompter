@@ -5,14 +5,14 @@ import { validateClientApiKey } from '@/lib/client-auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await validateClientApiKey(req);
     if (!auth.valid) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const prompt = await prisma.prompt.findFirst({
       where: {

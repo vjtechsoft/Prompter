@@ -5,7 +5,7 @@ import { logActivity } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser(req);
     if (!user) {
@@ -16,7 +16,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Forbidden: Only Super Admin can delete notifications' }, { status: 403 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const existing = await prisma.notification.findUnique({
       where: { id },
     });
