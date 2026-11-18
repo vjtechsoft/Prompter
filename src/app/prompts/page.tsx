@@ -37,6 +37,7 @@ import { Modal } from '@/components/ui/modal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PromptItem, CategoryItem } from '@/types';
 import { formatCompactNumber } from '@/lib/utils';
+import { sanitizeCsvField } from '@/lib/sanitize';
 import * as XLSX from 'xlsx';
 
 export default function PromptsPage() {
@@ -267,16 +268,17 @@ export default function PromptsPage() {
     success('Exported prompts to CSV');
   };
 
-  // Export to Excel
+  // Export to Excel (with CSV / Formula Injection Protection)
   const handleExportExcel = () => {
     const data = prompts.map((p) => ({
-      Title: p.title,
-      Category: p.category?.title || 'None',
-      PromptContent: p.prompt,
+      Title: sanitizeCsvField(p.title),
+      Category: sanitizeCsvField(p.category?.title || 'None'),
+      PromptContent: sanitizeCsvField(p.prompt),
       Premium: p.isPremium ? 'Yes' : 'No',
       Status: p.status ? 'Active' : 'Draft',
       Likes: p.likes,
       Views: p.views,
+      Copies: p.copies || 0,
       Shares: p.shares,
       TrendingScore: p.trendingScore || 0,
       PopularScore: p.popularScore || 0,

@@ -28,7 +28,7 @@ async function main() {
   await prisma.appUrls.deleteMany({});
   await prisma.user.deleteMany({});
 
-  const passwordHash = await bcrypt.hash('Admin@123456', 10);
+  const passwordHash = await bcrypt.hash('Prompter@Secured#2026!', 12);
 
   // 2. Create strictly ONE Super Admin
   const superAdmin = await prisma.user.create({

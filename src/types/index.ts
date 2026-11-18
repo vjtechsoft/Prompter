@@ -7,6 +7,7 @@ export type UserSession = {
   role: Role;
   avatar: string | null;
   status: string;
+  twoFactorEnabled?: boolean;
 };
 
 export type SubcategoryItem = {

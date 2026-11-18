@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
+import { timingSafeEqualStr } from './auth';
 
 export async function validateClientApiKey(req: NextRequest): Promise<{ valid: boolean; error?: string }> {
   try {
@@ -25,7 +26,7 @@ export async function validateClientApiKey(req: NextRequest): Promise<{ valid: b
       };
     }
 
-    if (key !== config.clientApiKey) {
+    if (!timingSafeEqualStr(key, config.clientApiKey)) {
       return {
         valid: false,
         error: 'Unauthorized: Invalid Client API Key provided.',

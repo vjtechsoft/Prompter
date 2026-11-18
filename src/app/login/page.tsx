@@ -13,6 +13,7 @@ import {
   Sparkles,
   Eye,
   EyeOff,
+  ShieldCheck,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
@@ -72,6 +73,8 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
 
   const router = useRouter();
   const { success, error: toastError } = useToast();
@@ -85,10 +88,16 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, rememberMe }),
+        body: JSON.stringify({ email, password, rememberMe, twoFactorCode }),
       });
 
       const data = await res.json();
+
+      if (data.requires2FA) {
+        setRequires2FA(true);
+        setLoading(false);
+        return;
+      }
 
       if (!res.ok) {
         setError(data.error || 'Authentication failed');
@@ -305,6 +314,45 @@ export default function LoginPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Two-Factor Authentication Input (Displayed if 2FA is active) */}
+                {requires2FA && (
+                  <div className="space-y-1.5 p-3 rounded-xl bg-indigo-950/40 border border-indigo-800/60 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-semibold text-indigo-300 uppercase tracking-wider">
+                        2FA Authenticator Code
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRequires2FA(false);
+                          setTwoFactorCode('');
+                        }}
+                        className="text-[11px] text-slate-400 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-400">
+                        <ShieldCheck className="w-4 h-4" />
+                      </div>
+                      <input
+                        type="text"
+                        autoFocus
+                        required
+                        maxLength={9}
+                        value={twoFactorCode}
+                        onChange={(e) => setTwoFactorCode(e.target.value)}
+                        placeholder="123456 or Backup Code"
+                        className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-indigo-700/60 rounded-lg text-sm text-white placeholder-slate-500 tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Enter the 6-digit code from your authenticator app or an 8-character recovery code.
+                    </p>
+                  </div>
+                )}
 
                 {/* Remember Me */}
                 <div className="flex items-center justify-between pt-1">

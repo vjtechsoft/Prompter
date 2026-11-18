@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { ShieldCheck, ArrowLeft, Printer, Clock } from 'lucide-react';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 interface LegalPageProps {
   params: Promise<{ slug: string }>;
@@ -109,7 +110,7 @@ export default async function LegalPolicyPage({ params }: LegalPageProps) {
                 [&_a]:text-indigo-400 [&_a]:underline hover:[&_a]:text-indigo-300
                 [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-slate-800 [&_th]:p-2 [&_th]:bg-slate-800 [&_td]:border [&_td]:border-slate-800 [&_td]:p-2
               "
-              dangerouslySetInnerHTML={{ __html: rawHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(rawHtml) }}
             />
           ) : (
             <div className="py-12 text-center text-slate-400">

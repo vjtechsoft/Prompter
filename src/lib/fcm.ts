@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { validateServiceIdentifier } from './ssrf';
 
 interface FcmConfig {
   fcmProjectId: string;
@@ -170,6 +171,9 @@ export async function sendFcmNotification(payload: FcmNotificationPayload): Prom
 
   // 1. Preferred Method: FCM HTTP v1 API using Google Service Account
   if (config.fcmProjectId && config.fcmClientEmail && config.fcmPrivateKey) {
+    if (!validateServiceIdentifier(config.fcmProjectId.trim())) {
+      return { success: false, successCount: 0, failureCount: 0, error: 'Security validation failed: Invalid FCM Project ID' };
+    }
     try {
       const accessToken = await getGoogleAccessToken(config.fcmClientEmail, config.fcmPrivateKey);
       const endpoint = `https://fcm.googleapis.com/v1/projects/${config.fcmProjectId}/messages:send`;
@@ -357,6 +361,9 @@ export async function testFcmConnection(config: FcmConfig): Promise<{
   message: string;
   details?: any;
 }> {
+  if (config.fcmProjectId && !validateServiceIdentifier(config.fcmProjectId.trim())) {
+    return { success: false, message: 'Security validation failed: Invalid FCM Project ID' };
+  }
   if (config.fcmProjectId && config.fcmClientEmail && config.fcmPrivateKey) {
     try {
       // 1. Verify token generation

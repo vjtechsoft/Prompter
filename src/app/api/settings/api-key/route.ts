@@ -13,6 +13,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Only Super Admin can access API Key settings' }, { status: 403 });
+    }
+
     const config = await prisma.appSettings.findUnique({
       where: { id: 'default' },
       select: {
@@ -36,6 +40,10 @@ export async function PUT(req: NextRequest) {
     const user = await getCurrentUser(req);
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Forbidden: Only Super Admin can modify API Key settings' }, { status: 403 });
     }
 
     const body = await req.json();

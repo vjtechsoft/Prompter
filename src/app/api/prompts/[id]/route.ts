@@ -67,6 +67,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
     }
 
+    // BOLA / IDOR Protection: Non-super admins can only modify prompts they created
+    if (user.role !== 'SUPER_ADMIN' && existing.createdById && existing.createdById !== user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden: You do not have permission to modify prompts created by another administrator' },
+        { status: 403 }
+      );
+    }
+
     // Check title uniqueness if title changed
     if (title && title.trim() !== existing.title) {
       const duplicateTitle = await prisma.prompt.findFirst({
@@ -150,7 +158,21 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
     }
 
+    // BOLA / IDOR Protection: Non-super admins can only modify prompts they created
+    if (user.role !== 'SUPER_ADMIN' && existing.createdById && existing.createdById !== user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden: You do not have permission to modify prompts created by another administrator' },
+        { status: 403 }
+      );
+    }
+
     if (force) {
+      if (user.role !== 'SUPER_ADMIN') {
+        return NextResponse.json(
+          { error: 'Forbidden: Only Super Admin can permanently delete prompts' },
+          { status: 403 }
+        );
+      }
       await prisma.prompt.delete({ where: { id } });
       await logActivity({
         userId: user.id,
@@ -194,6 +216,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const existing = await prisma.prompt.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: 'Prompt not found' }, { status: 404 });
+    }
+
+    // BOLA / IDOR Protection: Non-super admins can only modify prompts they created
+    if (user.role !== 'SUPER_ADMIN' && existing.createdById && existing.createdById !== user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden: You do not have permission to modify prompts created by another administrator' },
+        { status: 403 }
+      );
     }
 
     let updateData: any = {};

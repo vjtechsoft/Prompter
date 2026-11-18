@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { AdminLayout } from '@/components/layout/admin-layout';
 import {
   Settings,
@@ -2234,7 +2235,7 @@ export default function SettingsPage() {
                           <div
                             className="space-y-3 [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-4 [&_h2]:mb-1.5 [&_h2]:border-b [&_h2]:border-slate-800 [&_h2]:pb-1 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-indigo-400 [&_h3]:mt-3 [&_p]:text-slate-300 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1 [&_li]:text-slate-300 [&_blockquote]:border-l-2 [&_blockquote]:border-indigo-500 [&_blockquote]:pl-3 [&_blockquote]:text-slate-400 [&_blockquote]:italic [&_a]:text-indigo-400 [&_a]:underline"
                             dangerouslySetInnerHTML={{
-                              __html: (appUrls as any)[getPolicyHtmlKey(selectedPolicyTab)] || '',
+                              __html: sanitizeHtml((appUrls as any)[getPolicyHtmlKey(selectedPolicyTab)] || ''),
                             }}
                           />
                         ) : (
