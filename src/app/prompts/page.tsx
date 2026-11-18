@@ -38,7 +38,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { PromptItem, CategoryItem } from '@/types';
 import { formatCompactNumber } from '@/lib/utils';
 import { sanitizeCsvField } from '@/lib/sanitize';
-import * as XLSX from 'xlsx';
 
 export default function PromptsPage() {
   const [prompts, setPrompts] = useState<PromptItem[]>([]);
@@ -268,28 +267,57 @@ export default function PromptsPage() {
     success('Exported prompts to CSV');
   };
 
-  // Export to Excel (with CSV / Formula Injection Protection)
+  // Export to Excel / CSV (with Formula Injection Protection and UTF-8 BOM)
   const handleExportExcel = () => {
-    const data = prompts.map((p) => ({
-      Title: sanitizeCsvField(p.title),
-      Category: sanitizeCsvField(p.category?.title || 'None'),
-      PromptContent: sanitizeCsvField(p.prompt),
-      Premium: p.isPremium ? 'Yes' : 'No',
-      Status: p.status ? 'Active' : 'Draft',
-      Likes: p.likes,
-      Views: p.views,
-      Copies: p.copies || 0,
-      Shares: p.shares,
-      TrendingScore: p.trendingScore || 0,
-      PopularScore: p.popularScore || 0,
-      CreatedAt: new Date(p.createdAt).toLocaleString(),
-    }));
+    const headers = [
+      'Title',
+      'Category',
+      'Prompt Content',
+      'Premium',
+      'Status',
+      'Likes',
+      'Views',
+      'Copies',
+      'Shares',
+      'Trending Score',
+      'Popular Score',
+      'Created At',
+    ];
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Prompts');
-    XLSX.writeFile(workbook, `prompts_report_${Date.now()}.xlsx`);
-    success('Exported prompts to Excel (.xlsx)');
+    const rows = prompts.map((p) => [
+      sanitizeCsvField(p.title),
+      sanitizeCsvField(p.category?.title || 'None'),
+      sanitizeCsvField(p.prompt),
+      p.isPremium ? 'Yes' : 'No',
+      p.status ? 'Active' : 'Draft',
+      String(p.likes || 0),
+      String(p.views || 0),
+      String(p.copies || 0),
+      String(p.shares || 0),
+      String(p.trendingScore || 0),
+      String(p.popularScore || 0),
+      new Date(p.createdAt).toLocaleString(),
+    ]);
+
+    const csvContent =
+      '\uFEFF' +
+      [
+        headers.map((h) => `"${h.replace(/"/g, '""')}"`).join(','),
+        ...rows.map((row) =>
+          row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(',')
+        ),
+      ].join('\r\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `prompts_report_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    success('Exported prompts to CSV / Excel');
   };
 
   // Print Sheet
